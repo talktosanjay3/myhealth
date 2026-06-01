@@ -1069,14 +1069,22 @@
     // ─── Computed stats ───────────────────────────────────
     // ═══════════════════════════════════════════════════════
 
+    /**
+     * Consistency for a given day based on whatever completions exist in events.
+     * This reflects the actual historical record, not current activity list.
+     */
     function dayConsistency(dateKey) {
-      if (activities.length === 0) return 0;
       const day = events.find(e => e.date === dateKey);
       if (!day) return 0;
-      const done = activities.filter(a => day.completions[a.slug] === true).length;
-      return done / activities.length;
+      const slugs = Object.keys(day.completions);
+      if (slugs.length === 0) return 0;
+      const done = slugs.filter(s => day.completions[s]).length;
+      return done / slugs.length;
     }
 
+    /**
+     * Today's progress — based on active current activities.
+     */
     function todayProgress() {
       if (activities.length === 0) return { done: 0, total: 0, pct: 0 };
       const day = events.find(e => e.date === TODAY);
@@ -1085,31 +1093,38 @@
       return { done, total, pct: total > 0 ? done / total : 0 };
     }
 
+    /**
+     * Overall consistency across all events data, counting whatever
+     * slugs were tracked on each day.
+     */
     function getOverallConsistency() {
-      if (activities.length === 0 || events.length === 0) return 0;
+      if (events.length === 0) return 0;
       let totalChecks = 0, doneChecks = 0;
       for (const day of events) {
-        for (const activity of activities) {
-          if (day.completions[activity.slug] !== undefined) {
-            totalChecks++;
-            if (day.completions[activity.slug]) doneChecks++;
-          }
+        for (const [slug, val] of Object.entries(day.completions)) {
+          totalChecks++;
+          if (val) doneChecks++;
         }
       }
       return totalChecks > 0 ? doneChecks / totalChecks : 0;
     }
 
+    /**
+     * Streak walks backwards from today. A day counts if every slug
+     * tracked in its completions is true.
+     */
     function getStreak() {
       let streak = 0;
       const now = new Date();
-      if (activities.length === 0) return 0;
       for (let i = 0; i < 365; i++) {
         const d = new Date(now);
         d.setDate(d.getDate() - i);
         const key = dateStr(d);
         const day = events.find(e => e.date === key);
         if (!day) break;
-        const allDone = activities.every(a => day.completions[a.slug] === true);
+        const slugs = Object.keys(day.completions);
+        if (slugs.length === 0) break;
+        const allDone = slugs.every(s => day.completions[s]);
         if (!allDone) break;
         streak++;
       }
@@ -1208,8 +1223,8 @@
       const values = dates.map(d => {
         const day = events.find(e => e.date === d);
         if (!day) return null;
-        const hasCurrentActivity = activities.some(a => day.completions[a.slug] !== undefined);
-        if (!hasCurrentActivity) return null;
+        const slugs = Object.keys(day.completions);
+        if (slugs.length === 0) return null;
         return Math.round(dayConsistency(d) * 100);
       });
 
@@ -1347,11 +1362,10 @@
         if (key) {
           const day = events.find(e => e.date === key);
           if (day) {
-            const currentSlugs = activities.map(a => a.slug);
-            const done = currentSlugs.filter(s => day.completions[s] === true).length;
-            const tracked = currentSlugs.filter(s => day.completions[s] !== undefined).length;
-            if (tracked > 0) {
-              pct = done / currentSlugs.length;
+            const slugs = Object.keys(day.completions);
+            if (slugs.length > 0) {
+              const done = slugs.filter(s => day.completions[s]).length;
+              pct = done / slugs.length;
               level = pct === 0 ? 0 : Math.min(4, Math.ceil(pct * 4));
               hasData = true;
             }
