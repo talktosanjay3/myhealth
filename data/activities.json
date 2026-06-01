@@ -23,6 +23,12 @@
       "name": "test task",
       "createdAt": "2026-06-01",
       "deletedAt": null
+    },
+    {
+      "slug": "test-task-1",
+      "name": "test task 1",
+      "createdAt": "2026-06-01",
+      "deletedAt": null
     }
   ]
 }
