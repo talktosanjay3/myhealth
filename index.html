@@ -1,135 +1,1041 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>myhealth</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>myhealth · daily checklist</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --border: #e8ecf0;
+      --text: #1a1d23;
+      --text-secondary: #6b7280;
+      --text-tertiary: #9ca3af;
+      --accent: #059669;
+      --accent-light: #d1fae5;
+      --accent-dark: #047857;
+      --accent-subtle: #ecfdf5;
+      --red: #ef4444;
+      --red-light: #fef2f2;
+      --orange: #f59e0b;
+      --orange-light: #fffbeb;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --transition: 0.2s ease;
+    }
+    html { font-size: 16px; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+    .app-container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--accent);
+    }
+    header h1 span { color: var(--text); }
+    header .date {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+    header .subtitle {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+      font-weight: 400;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      padding: 20px 24px 24px;
+      transition: box-shadow var(--transition);
+    }
+    .card:hover { box-shadow: var(--shadow-md); }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .card-header h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .card-header .badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--bg);
+      padding: 2px 10px;
+      border-radius: 999px;
+    }
+
+    /* ── Dashboard grid ── */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 680px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      body { padding: 16px 12px; }
+    }
+
+    /* ── Checklist ── */
+    .checklist-progress {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .checklist-progress .label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .checklist-progress .bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--bg);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .checklist-progress .bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+    .checklist-items {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 8px 8px 4px;
+      border-radius: var(--radius-sm);
+      transition: background var(--transition);
+      position: relative;
+      cursor: pointer;
+    }
+    .checklist-item:hover { background: var(--accent-subtle); }
+    .checklist-item input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all var(--transition);
+      position: relative;
+    }
+    .checklist-item input[type="checkbox"]:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .checklist-item input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 2px;
+      width: 6px;
+      height: 11px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    .checklist-item label {
+      flex: 1;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 2px 0;
+      transition: color var(--transition);
+    }
+    .checklist-item.checked label {
+      color: var(--text-tertiary);
+      text-decoration: line-through;
+    }
+    .checklist-item .delete-btn {
+      opacity: 0;
+      background: none;
+      border: none;
+      color: var(--text-tertiary);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: all var(--transition);
+      font-family: var(--font);
+      line-height: 1;
+    }
+    .checklist-item:hover .delete-btn { opacity: 1; }
+    .checklist-item .delete-btn:hover { color: var(--red); background: var(--red-light); }
+
+    /* ── Add item ── */
+    .add-item-form {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 8px 8px 8px 4px;
+      border-radius: var(--radius-sm);
+      border: 1.5px dashed var(--border);
+      transition: all var(--transition);
+    }
+    .add-item-form:focus-within {
+      border-color: var(--accent);
+      background: var(--accent-subtle);
+    }
+    .add-item-form input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-family: var(--font);
+      font-size: 0.9rem;
+      color: var(--text);
+      outline: none;
+      padding: 4px 0;
+    }
+    .add-item-form input::placeholder { color: var(--text-tertiary); }
+    .add-item-form button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-family: var(--font);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .add-item-form button:hover { background: var(--accent-dark); }
+    .add-item-form button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .empty-checklist {
+      text-align: center;
+      padding: 28px 12px;
+      color: var(--text-tertiary);
+    }
+    .empty-checklist p { font-size: 0.9rem; margin-bottom: 4px; }
+    .empty-checklist .emoji { font-size: 2rem; margin-bottom: 8px; }
+
+    /* ── Stats ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .stat-card {
+      text-align: center;
+      padding: 16px 8px;
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+    }
+    .stat-card .stat-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 2px;
+    }
+    .stat-card .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .stat-card.primary .stat-value { color: var(--accent); }
+    .stat-card.stat-today .stat-fraction {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .stat-card.stat-today .stat-label { font-size: 0.75rem; }
+
+    /* ── Today's mini progress ring ── */
+    .progress-ring-container {
+      display: flex;
+      justify-content: center;
+      padding: 8px 0 4px;
+    }
+    .progress-ring {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .progress-ring .ring-fg {
+      transition: stroke-dashoffset 0.6s ease;
+    }
+    .progress-ring .ring-text {
+      position: absolute;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    /* ── Chart ── */
+    .chart-card { margin-bottom: 16px; }
+    .chart-card .chart-wrapper {
+      position: relative;
+      height: 240px;
+    }
+    .chart-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 240px;
+      color: var(--text-tertiary);
+      font-size: 0.9rem;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* ── Heatmap ── */
+    .heatmap-card { margin-bottom: 16px; }
+    .heatmap-wrapper {
+      overflow-x: auto;
+      padding: 4px 0;
+    }
+    .heatmap-grid {
+      display: inline-grid;
+      grid-template-rows: repeat(7, 1fr);
+      grid-auto-flow: column;
+      gap: 3px;
+    }
+    .heatmap-day-labels {
+      display: inline-grid;
+      grid-template-rows: repeat(7, 1fr);
+      gap: 3px;
+      margin-right: 8px;
+      vertical-align: top;
+    }
+    .heatmap-day-labels span {
+      width: 24px;
+      font-size: 0.6rem;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      font-weight: 500;
+    }
+    .heatmap-month-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    .heatmap-cell {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      background: var(--bg);
+      transition: all 0.15s ease;
+      position: relative;
+      cursor: default;
+    }
+    .heatmap-cell:hover {
+      transform: scale(1.3);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      z-index: 2;
+    }
+    .heatmap-cell.level-0 { background: #f0f2f5; }
+    .heatmap-cell.level-1 { background: #d1fae5; }
+    .heatmap-cell.level-2 { background: #6ee7b7; }
+    .heatmap-cell.level-3 { background: #34d399; }
+    .heatmap-cell.level-4 { background: #059669; }
+    .heatmap-cell.today { outline: 2px solid var(--accent); outline-offset: -1px; }
+    .heatmap-legend {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 12px;
+      justify-content: flex-end;
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+    }
+    .heatmap-legend .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+    .heatmap-empty {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-tertiary);
+      font-size: 0.85rem;
+    }
+
+    /* ── Tooltip ── */
+    .heatmap-tooltip {
+      position: fixed;
+      background: var(--text);
+      color: #fff;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      z-index: 100;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+    .heatmap-tooltip.visible { opacity: 1; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px 0 12px;
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+    }
+    footer span { color: var(--accent); }
+
+    /* ── Responsive adjustments ── */
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .checklist-item label { font-size: 0.88rem; }
+      .stat-card .stat-value { font-size: 1.5rem; }
+      .heatmap-cell { width: 12px; height: 12px; }
+      header h1 { font-size: 1.6rem; }
+    }
+  </style>
 </head>
 <body>
-  <div class="app">
 
-    <!-- Header -->
-    <header class="header">
-      <div class="header-left">
-        <div class="app-name">
-          <span class="mark"></span>
-          myhealth
+<div class="app-container">
+
+  <!-- Header -->
+  <header>
+    <h1>my<span>health</span></h1>
+    <div class="date" id="headerDate"></div>
+    <div class="subtitle">Daily health checklist</div>
+  </header>
+
+  <!-- Dashboard Grid -->
+  <div class="dashboard-grid">
+    <!-- Checklist Card -->
+    <div class="card checklist-card">
+      <div class="card-header">
+        <h2>Today's Checklist</h2>
+        <span class="badge" id="checklistCount">0 items</span>
+      </div>
+      <div class="checklist-progress" id="checklistProgress">
+        <span class="label" id="progressLabel">0/0</span>
+        <div class="bar-track"><div class="bar-fill" id="progressFill" style="width:0%"></div></div>
+      </div>
+      <div class="checklist-items" id="checklistItems"></div>
+      <div class="add-item-form">
+        <input type="text" id="newItemInput" placeholder="Add a new health goal…" maxlength="60" />
+        <button id="addItemBtn" disabled>Add</button>
+      </div>
+    </div>
+
+    <!-- Stats Card -->
+    <div class="card stats-card">
+      <div class="card-header">
+        <h2>Your Stats</h2>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card primary">
+          <div class="stat-value" id="overallConsistency">—</div>
+          <div class="stat-label">Consistency</div>
+        </div>
+        <div class="stat-card primary">
+          <div class="stat-value" id="currentStreak">—</div>
+          <div class="stat-label">Day Streak</div>
+        </div>
+        <div class="stat-card stat-today" style="grid-column: 1 / -1;">
+          <div class="progress-ring-container">
+            <div class="progress-ring">
+              <svg width="72" height="72" viewBox="0 0 72 72">
+                <circle cx="36" cy="36" r="30" fill="none" stroke="#e8ecf0" stroke-width="5"/>
+                <circle class="ring-fg" cx="36" cy="36" r="30" fill="none" stroke="var(--accent)" stroke-width="5"
+                  stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5" transform="rotate(-90, 36, 36)"/>
+              </svg>
+              <span class="ring-text" id="todayRingText">0%</span>
+            </div>
+          </div>
+          <div class="stat-label">Today</div>
         </div>
       </div>
-      <div class="header-right">
-        <span class="current-date" id="currentDate"></span>
-        <button class="btn btn-primary" id="addEntryBtn" aria-label="New entry">+ New Entry</button>
-        <button class="btn-icon" id="settingsBtn" aria-label="Settings" title="Settings">&#9881;</button>
-      </div>
-    </header>
-
-    <!-- Main Content -->
-    <main id="mainContent">
-      <!-- Loading state (shown initially) -->
-      <div class="loading-state" id="loadingState">
-        <div class="spinner"></div>
-        <p>Loading your progress&hellip;</p>
-      </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer" id="footer" hidden>
-      track daily &middot; stay consistent &middot; be well
-    </footer>
-  </div>
-
-  <!-- New Entry Modal -->
-  <div class="modal-overlay" id="entryModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>New Entry</h2>
-        <button class="modal-close" id="closeEntryModal" aria-label="Close">&times;</button>
-      </div>
-      <form id="entryForm" autocomplete="off">
-        <div class="form-group">
-          <label for="entryDate">Date</label>
-          <input type="date" id="entryDate" required />
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="proteinPercent">Protein %</label>
-            <input type="number" id="proteinPercent" min="0" max="100" step="1" placeholder="80" />
-          </div>
-          <div class="form-group">
-            <label for="waterGlasses">Water (glasses)</label>
-            <input type="number" id="waterGlasses" min="0" max="30" step="1" placeholder="7" />
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="exerciseMinutes">Exercise (min)</label>
-            <input type="number" id="exerciseMinutes" min="0" max="600" step="1" placeholder="30" />
-          </div>
-          <div class="form-group">
-            <label for="sleepHours">Sleep (hours)</label>
-            <input type="number" id="sleepHours" min="0" max="24" step="0.5" placeholder="7" />
-          </div>
-        </div>
-        <div class="form-check">
-          <label>
-            <input type="checkbox" id="generalHealth" checked />
-            Feeling good today
-          </label>
-        </div>
-        <div class="form-group">
-          <label for="notes">Notes <span style="color:var(--text-tertiary)">(optional)</span></label>
-          <textarea id="notes" rows="2" placeholder="How are you feeling?"></textarea>
-        </div>
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" id="cancelEntryBtn">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Entry</button>
-        </div>
-      </form>
     </div>
   </div>
 
-  <!-- Settings Modal -->
-  <div class="modal-overlay" id="settingsModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>Settings</h2>
-        <button class="modal-close" id="closeSettingsModal" aria-label="Close">&times;</button>
+  <!-- Chart Card -->
+  <div class="card chart-card">
+    <div class="card-header">
+      <h2>30-Day Trend</h2>
+      <span class="badge" id="chartBadge">Last 30 days</span>
+    </div>
+    <div class="chart-wrapper">
+      <canvas id="consistencyChart"></canvas>
+      <div class="chart-empty" id="chartEmpty">
+        <div style="font-size:1.6rem;">📊</div>
+        <p>Complete some checklists to see your trend</p>
       </div>
-      <p class="settings-note">
-        To save entries directly from this page, provide a
-        <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener">GitHub fine-grained token</a>
-        with <strong>Issues: Write</strong> access to this repository.
-        Without it, entries are saved locally only.
-      </p>
-      <form id="settingsForm" autocomplete="off">
-        <div class="form-group">
-          <label for="githubToken">GitHub Token</label>
-          <input type="password" id="githubToken" placeholder="github_pat_..." />
-        </div>
-        <div class="form-group">
-          <label for="repoFull">Repository</label>
-          <input type="text" id="repoFull" placeholder="owner/repo" />
-        </div>
-        <div class="gh-status" id="ghStatus">
-          <span class="indicator" id="ghIndicator"></span>
-          <span id="ghStatusText">Not connected</span>
-        </div>
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" id="cancelSettingsBtn">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save</button>
-        </div>
-      </form>
     </div>
   </div>
 
-  <!-- Toast container -->
-  <div class="toast-container" id="toastContainer"></div>
+  <!-- Heatmap Card -->
+  <div class="card heatmap-card">
+    <div class="card-header">
+      <h2>Monthly Activity</h2>
+      <span class="badge" id="heatmapMonthLabel"></span>
+    </div>
+    <div style="display:flex; align-items:flex-start;" id="heatmapContainer">
+      <div class="heatmap-day-labels" id="heatmapDayLabels"></div>
+      <div class="heatmap-wrapper">
+        <div class="heatmap-grid" id="heatmapGrid"></div>
+      </div>
+    </div>
+    <div class="heatmap-legend">
+      <span>Less</span>
+      <span class="swatch" style="background:#f0f2f5;"></span>
+      <span class="swatch" style="background:#d1fae5;"></span>
+      <span class="swatch" style="background:#6ee7b7;"></span>
+      <span class="swatch" style="background:#34d399;"></span>
+      <span class="swatch" style="background:#059669;"></span>
+      <span>More</span>
+    </div>
+    <div class="heatmap-empty" id="heatmapEmpty">
+      <p>Check off some items to start filling your month</p>
+    </div>
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="script.js"></script>
+  <!-- Tooltip -->
+  <div class="heatmap-tooltip" id="heatmapTooltip"></div>
+
+  <footer>✦ made with <span>consistency</span></footer>
+</div>
+
+<script>
+  (() => {
+    'use strict';
+
+    // ─── State ──────────────────────────────────────────────────────────
+    const LS_ITEMS = 'healthItems';
+    const LS_COMPLETIONS = 'healthCompletions';
+    const TODAY = dateStr(new Date());
+
+    const DEFAULT_ITEMS = [
+      { id: genId(), name: 'Exercise 30 min' },
+      { id: genId(), name: '8 glasses water' },
+      { id: genId(), name: '7-8 hrs sleep' },
+    ];
+
+    // Seed data: 30 days of sample completions for first visit
+    function buildSeedData(items) {
+      const seed = {};
+      const now = new Date();
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const key = dateStr(d);
+        const completions = {};
+        items.forEach((item, idx) => {
+          // Realistic patterns: some days have everything, some don't
+          const rand = Math.random();
+          if (idx === 0) completions[item.id] = rand < 0.7;   // exercise: 70%
+          else if (idx === 1) completions[item.id] = rand < 0.65; // water: 65%
+          else completions[item.id] = rand < 0.75;            // sleep: 75%
+        });
+        seed[key] = completions;
+      }
+      return seed;
+    }
+
+    function loadState() {
+      let items = load(LS_ITEMS);
+      let completions = load(LS_COMPLETIONS);
+      const isFirstVisit = !items;
+      if (!items) {
+        items = DEFAULT_ITEMS;
+        save(LS_ITEMS, items);
+      }
+      if (!completions) {
+        completions = isFirstVisit ? buildSeedData(items) : {};
+        save(LS_COMPLETIONS, completions);
+      }
+      return { items, completions };
+    }
+
+    let { items, completions } = loadState();
+    let chartInstance = null;
+
+    // ─── Helpers ────────────────────────────────────────────────────────
+    function dateStr(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+    function load(key) {
+      try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
+    }
+
+    function save(key, val) {
+      try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+    }
+
+    function persistState() {
+      save(LS_ITEMS, items);
+      save(LS_COMPLETIONS, completions);
+    }
+
+    function dayConsistency(dateKey) {
+      const day = completions[dateKey];
+      if (!day) return 0;
+      const itemIds = Object.keys(day);
+      if (itemIds.length === 0) return 0;
+      const done = itemIds.filter(id => day[id]).length;
+      return done / itemIds.length;
+    }
+
+    function todayProgress() {
+      if (items.length === 0) return { done: 0, total: 0, pct: 0 };
+      const day = completions[TODAY] || {};
+      const relevant = items.filter(i => day[i.id] !== undefined);
+      const total = items.length;
+      const done = items.filter(i => day[i.id] === true).length;
+      return { done, total, pct: total > 0 ? done / total : 0 };
+    }
+
+    function getOverallConsistency() {
+      const dates = Object.keys(completions);
+      if (dates.length === 0) return 0;
+      let totalChecks = 0, doneChecks = 0;
+      for (const d of dates) {
+        const day = completions[d];
+        const ids = Object.keys(day);
+        for (const id of ids) {
+          totalChecks++;
+          if (day[id]) doneChecks++;
+        }
+      }
+      return totalChecks > 0 ? doneChecks / totalChecks : 0;
+    }
+
+    function getStreak() {
+      // Walk backwards from today. A day counts if it's 100% on its tracked items.
+      let streak = 0;
+      const now = new Date();
+      for (let i = 0; i < 365; i++) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const key = dateStr(d);
+        const day = completions[key];
+        if (!day) break;
+        const ids = Object.keys(day);
+        if (ids.length === 0) break;
+        const allDone = ids.every(id => day[id] === true);
+        if (!allDone) break;
+        streak++;
+      }
+      return streak;
+    }
+
+    function getChartDates() {
+      const dates = [];
+      const now = new Date();
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        dates.push(dateStr(d));
+      }
+      return dates;
+    }
+
+    // ─── Date formatting ────────────────────────────────────────────────
+    function formatDateHeading(d) {
+      const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
+    }
+
+    function formatShortDate(key) {
+      const [y, m, d] = key.split('-');
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return `${months[+m - 1]} ${+d}`;
+    }
+
+    // ─── Render Checklist ───────────────────────────────────────────────
+    function renderChecklist() {
+      const container = document.getElementById('checklistItems');
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="empty-checklist">
+            <div class="emoji">🎯</div>
+            <p>No health goals yet</p>
+            <p style="font-size:0.8rem;color:var(--text-tertiary);">Add one below to get started!</p>
+          </div>`;
+      } else {
+        container.innerHTML = items.map(item => {
+          const checked = !!(completions[TODAY] && completions[TODAY][item.id]);
+          return `
+            <div class="checklist-item${checked ? ' checked' : ''}" data-id="${item.id}">
+              <input type="checkbox" id="chk-${item.id}" ${checked ? 'checked' : ''} />
+              <label for="chk-${item.id}">${escHtml(item.name)}</label>
+              <button class="delete-btn" data-id="${item.id}" title="Remove goal">✕</button>
+            </div>`;
+        }).join('');
+      }
+      updateProgressBar();
+      updateStats();
+      updateChartBadge();
+    }
+
+    function escHtml(s) {
+      const div = document.createElement('div');
+      div.textContent = s;
+      return div.innerHTML;
+    }
+
+    function updateProgressBar() {
+      const { done, total, pct } = todayProgress();
+      document.getElementById('progressLabel').textContent = `${done}/${total}`;
+      document.getElementById('progressFill').style.width = `${pct * 100}%`;
+      document.getElementById('checklistCount').textContent = `${total} item${total !== 1 ? 's' : ''}`;
+    }
+
+    // ─── Render Stats ────────────────────────────────────────────────────
+    function updateStats() {
+      const overall = getOverallConsistency();
+      const streak = getStreak();
+      const { done, total, pct } = todayProgress();
+
+      document.getElementById('overallConsistency').textContent = `${Math.round(overall * 100)}%`;
+      document.getElementById('currentStreak').textContent = `${streak} day${streak !== 1 ? 's' : ''}`;
+      document.getElementById('todayRingText').textContent = `${Math.round(pct * 100)}%`;
+
+      // Animated ring
+      const circumference = 2 * Math.PI * 30;
+      const offset = circumference * (1 - pct);
+      document.querySelector('.ring-fg').setAttribute('stroke-dashoffset', offset);
+    }
+
+    // ─── Chart ───────────────────────────────────────────────────────────
+    function renderChart() {
+      const dates = getChartDates();
+      const values = dates.map(d => {
+        const p = dayConsistency(d);
+        // If a day has no completions at all, exclude it from chart (null)
+        if (!completions[d] || Object.keys(completions[d]).length === 0) return null;
+        return Math.round(p * 100);
+      });
+
+      const hasData = values.some(v => v !== null);
+      const canvas = document.getElementById('consistencyChart');
+      const empty = document.getElementById('chartEmpty');
+
+      if (!hasData) {
+        canvas.style.display = 'none';
+        empty.style.display = 'flex';
+        return;
+      }
+      canvas.style.display = 'block';
+      empty.style.display = 'none';
+
+      const labels = dates.map(d => formatShortDate(d));
+
+      if (chartInstance) chartInstance.destroy();
+
+      const ctx = canvas.getContext('2d');
+      const gradient = ctx.createLinearGradient(0, 0, 0, 240);
+      gradient.addColorStop(0, 'rgba(5, 150, 105, 0.25)');
+      gradient.addColorStop(1, 'rgba(5, 150, 105, 0.01)');
+
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Consistency',
+            data: values,
+            fill: true,
+            backgroundColor: gradient,
+            borderColor: '#059669',
+            borderWidth: 2.5,
+            pointBackgroundColor: '#059669',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 3,
+            pointHoverRadius: 6,
+            tension: 0.35,
+            spanGaps: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1a1d23',
+              titleFont: { family: 'Inter', size: 12, weight: '600' },
+              bodyFont: { family: 'Inter', size: 13, weight: '700' },
+              padding: 8,
+              cornerRadius: 8,
+              callbacks: {
+                label: ctx => `${ctx.parsed.y}%`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                font: { family: 'Inter', size: 10 },
+                color: '#9ca3af',
+                maxTicksLimit: 8,
+              }
+            },
+            y: {
+              min: 0,
+              max: 100,
+              grid: { color: 'rgba(0,0,0,0.04)' },
+              ticks: {
+                font: { family: 'Inter', size: 10 },
+                color: '#9ca3af',
+                callback: v => v + '%',
+                stepSize: 25,
+              }
+            }
+          },
+          interaction: {
+            intersect: false,
+            mode: 'index',
+          }
+        }
+      });
+    }
+
+    function updateChartBadge() {
+      const dates = getChartDates();
+      const hasData = dates.some(d => completions[d] && Object.keys(completions[d]).length > 0);
+      document.getElementById('chartBadge').textContent = hasData ? 'Last 30 days' : 'No data yet';
+    }
+
+    // ─── Heatmap ────────────────────────────────────────────────────────
+    function renderHeatmap() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const todayKey = TODAY;
+
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
+
+      // Day of week for first day (0=Sun, 1=Mon, ... 6=Sat)
+      const startDow = firstDay.getDay();
+      // We want Monday-based (0=Mon, ... 6=Sun)
+      const startOffset = startDow === 0 ? 6 : startDow - 1;
+      // Total cells = offset + days
+      const totalCells = startOffset + daysInMonth;
+      const cols = Math.ceil(totalCells / 7);
+
+      const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      document.getElementById('heatmapMonthLabel').textContent = monthNames[month];
+
+      const dayLabels = ['Mon','','Wed','','Fri','','Sun'];
+      document.getElementById('heatmapDayLabels').innerHTML = dayLabels.map(d => `<span>${d}</span>`).join('');
+
+      const grid = document.getElementById('heatmapGrid');
+      grid.innerHTML = '';
+
+      let hasData = false;
+      const cells = [];
+      for (let i = 0; i < totalCells; i++) {
+        const dayNum = i - startOffset + 1;
+        const isOffset = i < startOffset;
+        const date = isOffset ? null : new Date(year, month, dayNum);
+        const key = date ? dateStr(date) : null;
+        const isToday = key === todayKey;
+
+        let level = 0;
+        let pct = 0;
+        if (key && completions[key]) {
+          const day = completions[key];
+          const ids = Object.keys(day);
+          if (ids.length > 0) {
+            const done = ids.filter(id => day[id]).length;
+            pct = done / ids.length;
+            level = pct === 0 ? 0 : Math.min(4, Math.ceil(pct * 4));
+            if (ids.length > 0) hasData = true;
+          }
+        }
+
+        const cell = document.createElement('div');
+        cell.className = `heatmap-cell level-${level}${isToday ? ' today' : ''}${isOffset ? '' : ''}`;
+        if (key) {
+          cell.dataset.date = key;
+          cell.dataset.pct = Math.round(pct * 100);
+          cell.addEventListener('mouseenter', onHeatmapHover);
+          cell.addEventListener('mousemove', onHeatmapMove);
+          cell.addEventListener('mouseleave', onHeatmapLeave);
+        }
+        if (isOffset) {
+          cell.style.visibility = 'hidden';
+        }
+        grid.appendChild(cell);
+      }
+
+      const empty = document.getElementById('heatmapEmpty');
+      empty.style.display = hasData ? 'none' : 'block';
+    }
+
+    const tooltipEl = document.getElementById('heatmapTooltip');
+    function onHeatmapHover(e) {
+      const cell = e.currentTarget;
+      const date = cell.dataset.date;
+      const pct = cell.dataset.pct;
+      tooltipEl.textContent = `${date} · ${pct}%`;
+      tooltipEl.classList.add('visible');
+    }
+    function onHeatmapMove(e) {
+      tooltipEl.style.left = (e.clientX + 12) + 'px';
+      tooltipEl.style.top = (e.clientY - 10) + 'px';
+    }
+    function onHeatmapLeave() {
+      tooltipEl.classList.remove('visible');
+    }
+
+    // ─── Event Handlers ─────────────────────────────────────────────────
+    function handleCheckboxChange(e) {
+      if (e.target.type !== 'checkbox') return;
+      const itemId = e.target.id.replace('chk-', '');
+      if (!completions[TODAY]) completions[TODAY] = {};
+      // Ensure all items are tracked for today (not just the changed one)
+      items.forEach(item => {
+        if (completions[TODAY][item.id] === undefined) completions[TODAY][item.id] = false;
+      });
+      completions[TODAY][itemId] = e.target.checked;
+      persistState();
+      renderChecklist();
+      renderChart();
+      renderHeatmap();
+      updateStats();
+    }
+
+    function handleDelete(e) {
+      const btn = e.target.closest('.delete-btn');
+      if (!btn) return;
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      items = items.filter(i => i.id !== id);
+      // Remove from completions
+      Object.keys(completions).forEach(d => delete completions[d][id]);
+      persistState();
+      renderChecklist();
+      renderChart();
+      renderHeatmap();
+    }
+
+    function handleAddItem() {
+      const input = document.getElementById('newItemInput');
+      const name = input.value.trim();
+      if (!name) return;
+      const newItem = { id: genId(), name };
+      items.push(newItem);
+      // Add to today's completions (default unchecked)
+      if (!completions[TODAY]) completions[TODAY] = {};
+      completions[TODAY][newItem.id] = false;
+      input.value = '';
+      document.getElementById('addItemBtn').disabled = true;
+      persistState();
+      renderChecklist();
+      renderChart();
+      renderHeatmap();
+      input.focus();
+    }
+
+    // ─── Init ───────────────────────────────────────────────────────────
+    function init() {
+      // Header date
+      document.getElementById('headerDate').textContent = formatDateHeading(new Date());
+
+      // Ensure today exists in completions with all items tracked
+      if (!completions[TODAY]) {
+        completions[TODAY] = {};
+      }
+      items.forEach(item => {
+        if (completions[TODAY][item.id] === undefined) completions[TODAY][item.id] = false;
+      });
+
+      // Render
+      renderChecklist();
+      renderChart();
+      renderHeatmap();
+
+      // ── Event Listeners ──
+      document.getElementById('checklistItems').addEventListener('change', handleCheckboxChange);
+      document.getElementById('checklistItems').addEventListener('click', handleDelete);
+
+      const newItemInput = document.getElementById('newItemInput');
+      const addBtn = document.getElementById('addItemBtn');
+
+      newItemInput.addEventListener('input', () => {
+        addBtn.disabled = !newItemInput.value.trim();
+      });
+      newItemInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && newItemInput.value.trim()) handleAddItem();
+      });
+      addBtn.addEventListener('click', handleAddItem);
+    }
+
+    init();
+  })();
+</script>
 </body>
 </html>
