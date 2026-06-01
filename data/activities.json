@@ -1,8 +1,8 @@
 {
   "activities": [
     {
-      "slug": "exercise-30-min",
-      "name": "Exercise 30 min",
+      "slug": "7-8-hrs-sleep",
+      "name": "7-8 hrs sleep",
       "createdAt": "2026-06-01",
       "deletedAt": null
     },
@@ -13,8 +13,14 @@
       "deletedAt": null
     },
     {
-      "slug": "7-8-hrs-sleep",
-      "name": "7-8 hrs sleep",
+      "slug": "exercise-30-min",
+      "name": "Exercise 30 min",
+      "createdAt": "2026-06-01",
+      "deletedAt": null
+    },
+    {
+      "slug": "test-task",
+      "name": "test task",
       "createdAt": "2026-06-01",
       "deletedAt": null
     }
