@@ -1,52 +1,81 @@
-# MyHealth Daily Tracker
+# myhealth
 
-A static GitHub Pages dashboard for your health checklist. Daily entries are recorded in `data/checklist.json` and updated automatically using GitHub Issues + Actions.
+A minimal, classy personal health tracking dashboard. Log your daily wellness metrics and watch your consistency grow.
 
-## How it works
+Deployed via **GitHub Pages** with data persistence powered by **GitHub Issues + Actions**.
 
-- `index.html` displays your latest progress, metrics, and a trend chart.
-- Use a GitHub issue with the daily entry template to log a new day.
-- The action in `.github/workflows/update-checklist.yml` parses the issue and updates `data/checklist.json`.
-- Once the workflow completes, refresh the site to see your latest entry.
+## Features
 
-## Deploy on GitHub Pages
+- **Clean dashboard** — Streak counter, consistency score, goal tracking, and 14-day trend chart
+- **Inline data entry** — Click "+ New Entry" to log daily health data directly from the dashboard
+- **GitHub-backed persistence** — Entries are saved via GitHub Issues, processed by an Action, and committed to `data/checklist.json`
+- **Local fallback** — Without GitHub config, entries are saved locally so you can still use the UI
+- **Dark green accent** — Calm, natural aesthetic
+
+## Quick Start
 
 1. Push this repository to GitHub.
-2. In repository settings, enable GitHub Pages from the `main` branch and root folder.
-3. Your site will be available at `https://<username>.github.io/<repo>/`.
+2. Enable **GitHub Pages** from the `main` branch (root folder).
+3. Visit your site — sample data is included to show the dashboard in action.
 
-## Use the issue template
+### Adding Data
 
-Create a new issue with the `Daily health entry` template. Example issue body:
+**Option A — Inline form (recommended):**
+Click "+ New Entry" on the dashboard, fill in your metrics, and save.
+- With GitHub configured: entries are synced to your repo automatically.
+- Without GitHub: entries are saved locally in your browser.
 
-```text
-Date: 2026-05-31
-Protein %: 90
-Water glasses: 8
-Exercise minutes: 30
-Sleep hours: 7.5
-General health: yes
-Notes: Good energy, protein goal met, stayed disciplined.
+**Option B — GitHub Issue:**
+Open a new issue with the `Daily health entry` template. The GitHub Action will parse it and update the data.
+
+### GitHub Sync Setup
+
+To save entries from the dashboard directly to your repo:
+
+1. Create a [GitHub fine-grained personal access token](https://github.com/settings/tokens?type=beta) with **Issues: Write** permission for this repository.
+2. Click the settings gear (&#9881;) on the dashboard.
+3. Paste your token and enter your repo as `owner/repo`.
+4. Entries will now create GitHub Issues that auto-update your checklist.
+
+## Data Model
+
+Each daily entry contains:
+
+| Field | Type | Target |
+|---|---|---|
+| Date | ISO date | — |
+| Protein % | Number 0–100 | >= 80% |
+| Water glasses | Number | >= 7 |
+| Exercise minutes | Number | — |
+| Sleep hours | Number | >= 7 |
+| General health | Boolean | true |
+| Notes | Text | — |
+
+Data is stored in `data/checklist.json` as a JSON array of entries.
+
+## Project Structure
+
+```
+.github/
+  ISSUE_TEMPLATE/daily-entry.md   — Issue template
+  workflows/update-checklist.yml  — GitHub Action (parses issues → updates data)
+data/
+  checklist.json                  — Data store
+scripts/
+  update-checklist.js             — CI script (runs in GitHub Actions)
+index.html                        — Dashboard HTML
+styles.css                        — Dashboard styles
+script.js                         — Dashboard logic + data entry form
+README.md                         — This file
 ```
 
-## How to add inputs
+## Tech Stack
 
-1. Open a new issue in the repository.
-2. Choose the `Daily health entry` template.
-3. Fill in the fields and submit the issue.
-4. Wait for the workflow to run and update `data/checklist.json`.
-5. Refresh the GitHub Pages site to see the latest metrics.
-
-## Notes
-
-- The action runs on issue creation and issue edit events.
-- It updates or inserts the entry for the date in `data/checklist.json`.
-- If your issue does not include valid fields, the workflow will fail and report the issue.
+- **Frontend:** Vanilla HTML/CSS/JS, no build step
+- **Charting:** Chart.js 4.4 (CDN)
+- **Backend:** GitHub Actions (Node.js 20)
+- **Hosting:** GitHub Pages
 
 ## Customization
 
-If you want, I can also add:
-
-- a settings panel for your exact targets,
-- a GitHub Pages button and repository link inside the site,
-- additional metrics like weekly weight and calorie tracking.
+Want to adjust targets, add metrics, or change the design? The code is intentionally simple — all targets (protein >= 80%, water >= 7 glasses, etc.) are defined in `script.js` and easy to modify.

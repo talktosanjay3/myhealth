@@ -3,120 +3,133 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MyHealth Daily Checklist</title>
+  <title>myhealth</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <div class="page-shell">
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">Daily health tracker</p>
-        <h1>MyHealth Checklist</h1>
-        <p class="subtitle">Your dashboard for protein, water, sleep, and general health consistency.</p>
-      </div>
-      <div class="badge">Built for daily momentum</div>
-    </header>
+  <div class="app">
 
-    <section class="hero-card">
-      <div class="hero-copy">
-        <h2 id="hero-title">Loading your latest progress…</h2>
-        <p id="hero-text">The dashboard will display your most recent entries and consistency score.</p>
-      </div>
-      <div class="hero-metrics">
-        <div><span id="streak">0</span><small>day streak</small></div>
-        <div><span id="consistency">0%</span><small>consistency</small></div>
-        <div><span id="progress">0%</span><small>goal score</small></div>
-      </div>
-    </section>
-
-    <section class="overview-grid">
-      <article class="mini-card">
-        <p>Protein target</p>
-        <strong id="today-protein">—</strong>
-        <div class="progress-bar" id="protein-bar"><span></span></div>
-      </article>
-      <article class="mini-card">
-        <p>Water intake</p>
-        <strong id="today-water">—</strong>
-        <div class="progress-bar" id="water-bar"><span></span></div>
-      </article>
-      <article class="mini-card">
-        <p>Sleep</p>
-        <strong id="today-sleep">—</strong>
-        <div class="progress-bar" id="sleep-bar"><span></span></div>
-      </article>
-      <article class="mini-card">
-        <p>General health</p>
-        <strong id="today-health">—</strong>
-        <div class="progress-bar" id="health-bar"><span></span></div>
-      </article>
-    </section>
-
-    <section class="cards-grid">
-      <article class="card">
-        <h3>Latest entry</h3>
-        <dl>
-          <div><dt>Date</dt><dd id="latest-date">—</dd></div>
-          <div><dt>Protein</dt><dd id="latest-protein">—</dd></div>
-          <div><dt>Water</dt><dd id="latest-water">—</dd></div>
-          <div><dt>Exercise</dt><dd id="latest-exercise">—</dd></div>
-          <div><dt>Sleep</dt><dd id="latest-sleep">—</dd></div>
-          <div><dt>General health</dt><dd id="latest-health">—</dd></div>
-          <div><dt>Notes</dt><dd id="latest-notes">—</dd></div>
-        </dl>
-      </article>
-      <article class="card">
-        <h3>Weekly summary</h3>
-        <ul>
-          <li><strong id="days-recorded">0</strong> days recorded</li>
-          <li><strong id="protein-score">0%</strong> protein goal hit</li>
-          <li><strong id="water-score">0%</strong> hydration hit</li>
-          <li><strong id="sleep-score">0%</strong> sleep goal hit</li>
-        </ul>
-      </article>
-      <article class="card uplift">
-        <h3>Motivation</h3>
-        <p id="motivation-text">Keep going. Every entry builds consistency.</p>
-      </article>
-    </section>
-
-    <section class="chart-card">
-      <div class="chart-header">
-        <div>
-          <h3>Trend overview</h3>
-          <p>Track last 14 days of progress and see how your routine is improving.</p>
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="app-name">
+          <span class="mark"></span>
+          myhealth
         </div>
       </div>
-      <canvas id="healthChart"></canvas>
-    </section>
-
-    <section class="guide-card">
-      <h3>How to add your inputs</h3>
-      <p>Add new daily data using a GitHub issue. The repository workflow will update <code>data/checklist.json</code> for you.</p>
-      <ol>
-        <li>Open a new issue in the repository.</li>
-        <li>Select the <strong>Daily health entry</strong> template.</li>
-        <li>Fill in the values and submit the issue.</li>
-      </ol>
-      <p>Example issue body:</p>
-      <div class="template-card">
-        <pre><code>Date: 2026-05-31
-Protein %: 90
-Water glasses: 8
-Exercise minutes: 30
-Sleep hours: 7.5
-General health: yes
-Notes: Strong energy, good protein intake, stayed on track.</code></pre>
+      <div class="header-right">
+        <span class="current-date" id="currentDate"></span>
+        <button class="btn btn-primary" id="addEntryBtn" aria-label="New entry">+ New Entry</button>
+        <button class="btn-icon" id="settingsBtn" aria-label="Settings" title="Settings">&#9881;</button>
       </div>
-      <p class="note">After the workflow runs, refresh the page to see your updated metrics.</p>
-    </section>
+    </header>
 
-    <footer class="footer">
-      <p>Track your daily consistency and celebrate small wins every time.</p>
+    <!-- Main Content -->
+    <main id="mainContent">
+      <!-- Loading state (shown initially) -->
+      <div class="loading-state" id="loadingState">
+        <div class="spinner"></div>
+        <p>Loading your progress&hellip;</p>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" id="footer" hidden>
+      track daily &middot; stay consistent &middot; be well
     </footer>
   </div>
 
+  <!-- New Entry Modal -->
+  <div class="modal-overlay" id="entryModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>New Entry</h2>
+        <button class="modal-close" id="closeEntryModal" aria-label="Close">&times;</button>
+      </div>
+      <form id="entryForm" autocomplete="off">
+        <div class="form-group">
+          <label for="entryDate">Date</label>
+          <input type="date" id="entryDate" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="proteinPercent">Protein %</label>
+            <input type="number" id="proteinPercent" min="0" max="100" step="1" placeholder="80" />
+          </div>
+          <div class="form-group">
+            <label for="waterGlasses">Water (glasses)</label>
+            <input type="number" id="waterGlasses" min="0" max="30" step="1" placeholder="7" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="exerciseMinutes">Exercise (min)</label>
+            <input type="number" id="exerciseMinutes" min="0" max="600" step="1" placeholder="30" />
+          </div>
+          <div class="form-group">
+            <label for="sleepHours">Sleep (hours)</label>
+            <input type="number" id="sleepHours" min="0" max="24" step="0.5" placeholder="7" />
+          </div>
+        </div>
+        <div class="form-check">
+          <label>
+            <input type="checkbox" id="generalHealth" checked />
+            Feeling good today
+          </label>
+        </div>
+        <div class="form-group">
+          <label for="notes">Notes <span style="color:var(--text-tertiary)">(optional)</span></label>
+          <textarea id="notes" rows="2" placeholder="How are you feeling?"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="cancelEntryBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Entry</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button class="modal-close" id="closeSettingsModal" aria-label="Close">&times;</button>
+      </div>
+      <p class="settings-note">
+        To save entries directly from this page, provide a
+        <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener">GitHub fine-grained token</a>
+        with <strong>Issues: Write</strong> access to this repository.
+        Without it, entries are saved locally only.
+      </p>
+      <form id="settingsForm" autocomplete="off">
+        <div class="form-group">
+          <label for="githubToken">GitHub Token</label>
+          <input type="password" id="githubToken" placeholder="github_pat_..." />
+        </div>
+        <div class="form-group">
+          <label for="repoFull">Repository</label>
+          <input type="text" id="repoFull" placeholder="owner/repo" />
+        </div>
+        <div class="gh-status" id="ghStatus">
+          <span class="indicator" id="ghIndicator"></span>
+          <span id="ghStatusText">Not connected</span>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="cancelSettingsBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
