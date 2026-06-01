@@ -1,22 +1,22 @@
 {
   "activities": [
     {
-      "slug": "7-8-hrs-sleep",
-      "name": "7-8 hrs sleep",
-      "createdAt": "2026-06-01",
-      "deletedAt": "2026-06-01"
+      "slug": "exercise-30-min",
+      "name": "Exercise 30 min",
+      "createdAt": "2026-05-20",
+      "deletedAt": null
     },
     {
       "slug": "8-glasses-water",
       "name": "8 glasses water",
-      "createdAt": "2026-06-01",
-      "deletedAt": "2026-06-01"
+      "createdAt": "2026-05-20",
+      "deletedAt": null
     },
     {
-      "slug": "exercise-30-min",
-      "name": "Exercise 30 min",
-      "createdAt": "2026-06-01",
-      "deletedAt": "2026-06-01"
+      "slug": "7-8-hrs-sleep",
+      "name": "7-8 hrs sleep",
+      "createdAt": "2026-05-20",
+      "deletedAt": null
     },
     {
       "slug": "test-task",
