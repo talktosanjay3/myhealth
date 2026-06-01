@@ -24,6 +24,11 @@
       "slug": "meditate",
       "name": "Meditate",
       "createdAt": "2026-06-01"
+    },
+    {
+      "slug": "self-talk",
+      "name": "Self talk",
+      "createdAt": "2026-06-01"
     }
   ]
 }
