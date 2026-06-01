@@ -19,6 +19,11 @@
       "slug": "gen-health",
       "name": "Gen health",
       "createdAt": "2026-06-01"
+    },
+    {
+      "slug": "meditate",
+      "name": "Meditate",
+      "createdAt": "2026-06-01"
     }
   ]
 }
