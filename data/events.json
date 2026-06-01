@@ -5,7 +5,10 @@
       "completions": {
         "exercise-30-min": true,
         "8-glasses-water": true,
-        "7-8-hrs-sleep": true
+        "7-8-hrs-sleep": true,
+        "30-min-run": true,
+        "70-protien": false,
+        "gen-health": true
       }
     },
     {
