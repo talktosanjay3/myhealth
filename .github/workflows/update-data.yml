@@ -34,3 +34,8 @@ jobs:
           git add data/
           git diff --cached --quiet || git commit -m "Update data from issue #${{ github.event.issue.number }}"
           git push
+
+      - name: Close the issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh issue close ${{ github.event.issue.number }} --reason completed
