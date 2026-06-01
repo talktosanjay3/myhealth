@@ -1,3 +1,11 @@
 {
-  "events": []
+  "events": [
+    {
+      "date": "2026-06-01",
+      "completions": {
+        "30-min-run": true,
+        "gen-health": true
+      }
+    }
+  ]
 }
