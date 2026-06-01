@@ -875,13 +875,13 @@
         if (change.type === 'add') {
           const existing = merged.find(a => a.slug === slug);
           if (existing) {
-            existing.deletedAt = null; // un-delete
+            console.log(`Activity "${change.name}" already exists — skip`);
           } else {
-            merged.push({ slug, name: change.name, createdAt: TODAY, deletedAt: null });
+            merged.push({ slug, name: change.name, createdAt: TODAY });
           }
         } else if (change.type === 'remove') {
-          const existing = merged.find(a => a.slug === slug);
-          if (existing) existing.deletedAt = TODAY;
+          const idx = merged.findIndex(a => a.slug === slug);
+          if (idx !== -1) merged.splice(idx, 1);
         }
       }
       return merged;
@@ -928,8 +928,8 @@
         events = mergePendingEvents(events, pendingChanges.completions);
       }
 
-      // Filter activities to active only for rendering
-      activities = allActivities.filter(a => !a.deletedAt);
+      // Render full activities list (no soft-delete)
+      activities = [...allActivities];
     }
 
     // ═══════════════════════════════════════════════════════
@@ -1431,8 +1431,8 @@
 
       // Update local state immediately
       activities = activities.filter(a => a.slug !== slug);
-      const allItem = allActivities.find(a => a.slug === slug);
-      if (allItem) allItem.deletedAt = TODAY;
+      const actIdx = allActivities.findIndex(a => a.slug === slug);
+      if (actIdx !== -1) allActivities.splice(actIdx, 1);
 
       saveState();
       renderChecklist();
@@ -1452,13 +1452,10 @@
 
       // Update local state immediately
       if (!allActivities.find(a => a.slug === slug)) {
-        allActivities.push({ slug, name, createdAt: TODAY, deletedAt: null });
-      } else {
-        const existing = allActivities.find(a => a.slug === slug);
-        existing.deletedAt = null;
+        allActivities.push({ slug, name, createdAt: TODAY });
       }
       if (!activities.find(a => a.slug === slug)) {
-        activities.push({ slug, name, createdAt: TODAY, deletedAt: null });
+        activities.push({ slug, name, createdAt: TODAY });
       }
 
       // Ensure today's completions entry exists
@@ -1588,7 +1585,7 @@
         const cachedE = load(LS_CACHE_EVENTS) || [];
         allActivities = cachedA;
         events = cachedE;
-        activities = allActivities.filter(a => !a.deletedAt);
+        activities = [...allActivities];
         renderAll();
       });
 
