@@ -46,27 +46,74 @@
 
     /* ── Header ── */
     header {
-      text-align: center;
-      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 8px;
     }
-    header h1 {
-      font-size: 2rem;
+    header .left { text-align: left; }
+    header .left h1 {
+      font-size: 1.8rem;
       font-weight: 800;
       letter-spacing: -0.03em;
       color: var(--accent);
+      line-height: 1.1;
     }
-    header h1 span { color: var(--text); }
-    header .date {
-      font-size: 0.9rem;
+    header .left h1 span { color: var(--text); }
+    header .left .date {
+      font-size: 0.85rem;
       color: var(--text-secondary);
-      margin-top: 4px;
       font-weight: 500;
     }
-    header .subtitle {
-      font-size: 0.85rem;
-      color: var(--text-tertiary);
-      font-weight: 400;
+    header .right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
+
+    /* ── Sync banner ── */
+    .sync-banner {
+      background: var(--orange-light);
+      border: 1px solid #fde68a;
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .sync-banner.visible { display: flex; }
+    .sync-banner .sync-label { color: #92400e; }
+    .sync-banner .sync-actions { display: flex; gap: 6px; }
+    .sync-banner .sync-status { font-size: 0.75rem; color: var(--text-tertiary); }
+
+    .btn {
+      font-family: var(--font);
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-dark); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-secondary { background: var(--bg); color: var(--text-secondary); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-ghost { background: transparent; color: var(--text-secondary); padding: 6px 8px; }
+    .btn-ghost:hover { background: var(--bg); }
+    .btn-sm { padding: 4px 10px; font-size: 0.75rem; }
+    .btn-icon { background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 4px 6px; border-radius: 6px; transition: background var(--transition); line-height: 1; }
+    .btn-icon:hover { background: var(--bg); }
 
     /* ── Cards ── */
     .card {
@@ -98,6 +145,24 @@
       padding: 2px 10px;
       border-radius: 999px;
     }
+
+    /* ── Data source indicator ── */
+    .data-source {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+    .data-source .dot {
+      width: 7px; height: 7px; border-radius: 50%; display: inline-block;
+    }
+    .data-source .dot.online { background: var(--accent); }
+    .data-source .dot.offline { background: var(--orange); }
+    .data-source .dot.loading { background: var(--text-tertiary); animation: pulse 1s ease infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
     /* ── Dashboard grid ── */
     .dashboard-grid {
@@ -295,7 +360,6 @@
     }
     .stat-card.stat-today .stat-label { font-size: 0.75rem; }
 
-    /* ── Today's mini progress ring ── */
     .progress-ring-container {
       display: flex;
       justify-content: center;
@@ -429,6 +493,81 @@
     }
     .heatmap-tooltip.visible { opacity: 1; }
 
+    /* ── Settings Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 16px;
+    }
+    .modal-overlay.visible { display: flex; }
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 28px 32px 32px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .modal h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .modal .modal-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+    .modal .form-group {
+      margin-bottom: 14px;
+    }
+    .modal .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    .modal .form-group input {
+      width: 100%;
+      font-family: var(--font);
+      font-size: 0.9rem;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      transition: border var(--transition);
+    }
+    .modal .form-group input:focus { border-color: var(--accent); }
+    .modal .form-group .hint {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      margin-top: 3px;
+    }
+    .modal .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    .modal .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+    .modal .status-badge.connected { background: var(--accent-light); color: var(--accent-dark); }
+    .modal .status-badge.disconnected { background: var(--red-light); color: var(--red); }
+
     /* ── Footer ── */
     footer {
       text-align: center;
@@ -438,13 +577,38 @@
     }
     footer span { color: var(--accent); }
 
-    /* ── Responsive adjustments ── */
+    /* ── Toast ── */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 300;
+    }
+    .toast {
+      background: var(--text);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md);
+      animation: slideUp 0.3s ease;
+      max-width: 320px;
+    }
+    .toast.success { background: var(--accent-dark); }
+    .toast.error { background: var(--red); }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
     @media (max-width: 480px) {
       .stats-grid { grid-template-columns: 1fr 1fr; }
       .checklist-item label { font-size: 0.88rem; }
       .stat-card .stat-value { font-size: 1.5rem; }
       .heatmap-cell { width: 12px; height: 12px; }
-      header h1 { font-size: 1.6rem; }
+      header .left h1 { font-size: 1.4rem; }
+      .modal { padding: 20px; }
     }
   </style>
 </head>
@@ -454,10 +618,30 @@
 
   <!-- Header -->
   <header>
-    <h1>my<span>health</span></h1>
-    <div class="date" id="headerDate"></div>
-    <div class="subtitle">Daily health checklist</div>
+    <div class="left">
+      <h1>my<span>health</span></h1>
+      <div class="date" id="headerDate"></div>
+    </div>
+    <div class="right">
+      <button class="btn-icon" id="refreshBtn" title="Refresh from GitHub">⟳</button>
+      <button class="btn-icon" id="settingsBtn" title="Settings">⚙</button>
+    </div>
   </header>
+
+  <!-- Sync Banner -->
+  <div class="sync-banner" id="syncBanner">
+    <span class="sync-label" id="syncLabel">📝 Changes pending sync</span>
+    <div class="sync-actions">
+      <button class="btn btn-primary btn-sm" id="syncBtn">Sync to GitHub</button>
+      <button class="btn btn-secondary btn-sm" id="discardBtn">Discard</button>
+    </div>
+  </div>
+
+  <!-- Data source -->
+  <div class="data-source">
+    <span class="dot loading" id="sourceDot"></span>
+    <span id="sourceLabel">Loading data...</span>
+  </div>
 
   <!-- Dashboard Grid -->
   <div class="dashboard-grid">
@@ -553,6 +737,31 @@
   <!-- Tooltip -->
   <div class="heatmap-tooltip" id="heatmapTooltip"></div>
 
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <h2>Settings</h2>
+      <p class="modal-desc">Connect your GitHub repo to sync data. You need a fine-grained token with <strong>Issues: Write</strong> permission.</p>
+      <div id="connectionStatus"></div>
+      <div class="form-group">
+        <label for="settingsRepo">Repository</label>
+        <input type="text" id="settingsRepo" placeholder="owner/repo" />
+      </div>
+      <div class="form-group">
+        <label for="settingsToken">GitHub Token</label>
+        <input type="password" id="settingsToken" placeholder="github_pat_..." />
+        <div class="hint">Create at <strong>Settings → Developer settings → Personal access tokens → Fine-grained tokens</strong></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="settingsCancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="settingsSaveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
   <footer>✦ made with <span>consistency</span></footer>
 </div>
 
@@ -560,57 +769,32 @@
   (() => {
     'use strict';
 
-    // ─── State ──────────────────────────────────────────────────────────
-    const LS_ITEMS = 'healthItems';
-    const LS_COMPLETIONS = 'healthCompletions';
+    // ═══════════════════════════════════════════════════════
+    // ─── Constants ────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
+    const LS_CACHE_ACTIVITIES = 'healthCacheActivities';
+    const LS_CACHE_EVENTS    = 'healthCacheEvents';
+    const LS_PENDING         = 'healthPendingChanges';
+    const LS_SETTINGS        = 'healthSettings';
+    const LS_LAST_REFRESH    = 'healthLastRefresh';
     const TODAY = dateStr(new Date());
 
-    const DEFAULT_ITEMS = [
-      { id: genId(), name: 'Exercise 30 min' },
-      { id: genId(), name: '8 glasses water' },
-      { id: genId(), name: '7-8 hrs sleep' },
-    ];
+    const ACTIVITIES_URL = 'https://raw.githubusercontent.com/talktosanjay3/myhealth/refs/heads/main/data/activities.json';
+    const EVENTS_URL     = 'https://raw.githubusercontent.com/talktosanjay3/myhealth/refs/heads/main/data/events.json';
 
-    // Seed data: 30 days of sample completions for first visit
-    function buildSeedData(items) {
-      const seed = {};
-      const now = new Date();
-      for (let i = 29; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - i);
-        const key = dateStr(d);
-        const completions = {};
-        items.forEach((item, idx) => {
-          // Realistic patterns: some days have everything, some don't
-          const rand = Math.random();
-          if (idx === 0) completions[item.id] = rand < 0.7;   // exercise: 70%
-          else if (idx === 1) completions[item.id] = rand < 0.65; // water: 65%
-          else completions[item.id] = rand < 0.75;            // sleep: 75%
-        });
-        seed[key] = completions;
-      }
-      return seed;
-    }
-
-    function loadState() {
-      let items = load(LS_ITEMS);
-      let completions = load(LS_COMPLETIONS);
-      const isFirstVisit = !items;
-      if (!items) {
-        items = DEFAULT_ITEMS;
-        save(LS_ITEMS, items);
-      }
-      if (!completions) {
-        completions = isFirstVisit ? buildSeedData(items) : {};
-        save(LS_COMPLETIONS, completions);
-      }
-      return { items, completions };
-    }
-
-    let { items, completions } = loadState();
+    // ─── State ────────────────────────────────────────────
+    let activities = [];      // active (non-deleted) activities
+    let allActivities = [];   // raw from JSON, including deleted
+    let events = [];
+    let pendingChanges = { completions: {}, activityChanges: [] };
+    let settings = { token: '', repo: 'talktosanjay3/myhealth' };
     let chartInstance = null;
 
-    // ─── Helpers ────────────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+    // ─── Helpers ──────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
     function dateStr(d) {
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -618,7 +802,9 @@
       return `${y}-${m}-${day}`;
     }
 
-    function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+    function nameToSlug(name) {
+      return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    }
 
     function load(key) {
       try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
@@ -628,57 +814,302 @@
       try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
     }
 
-    function persistState() {
-      save(LS_ITEMS, items);
-      save(LS_COMPLETIONS, completions);
+    function escHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
     }
 
+    function toast(msg, type = 'success') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ─── Data Loading ─────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
+    function setSourceStatus(state, label) {
+      const dot = document.getElementById('sourceDot');
+      const lbl = document.getElementById('sourceLabel');
+      dot.className = `dot ${state}`;
+      lbl.textContent = label;
+    }
+
+    async function fetchJSON(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+
+    /**
+     * Merge pending completions onto a copy of events data.
+     * Returns a new events array with pending changes applied.
+     */
+    function mergePendingEvents(eventsArr, pendingComps) {
+      const merged = eventsArr.map(e => ({ ...e, completions: { ...e.completions } }));
+      for (const [date, comps] of Object.entries(pendingComps)) {
+        let day = merged.find(e => e.date === date);
+        if (!day) {
+          day = { date, completions: {} };
+          merged.push(day);
+        }
+        for (const [slug, val] of Object.entries(comps)) {
+          day.completions[slug] = val;
+        }
+      }
+      return merged.sort((a, b) => b.date.localeCompare(a.date));
+    }
+
+    /**
+     * Merge pending activity changes onto the raw allActivities.
+     */
+    function mergePendingActivities(activitiesArr, pendingActs) {
+      const merged = activitiesArr.map(a => ({ ...a }));
+      for (const change of pendingActs) {
+        const slug = nameToSlug(change.name);
+        if (change.type === 'add') {
+          const existing = merged.find(a => a.slug === slug);
+          if (existing) {
+            existing.deletedAt = null; // un-delete
+          } else {
+            merged.push({ slug, name: change.name, createdAt: TODAY, deletedAt: null });
+          }
+        } else if (change.type === 'remove') {
+          const existing = merged.find(a => a.slug === slug);
+          if (existing) existing.deletedAt = TODAY;
+        }
+      }
+      return merged;
+    }
+
+    async function loadData() {
+      setSourceStatus('loading', 'Loading data from GitHub...');
+      let usedCache = false;
+
+      try {
+        const rawActivities = await fetchJSON(ACTIVITIES_URL);
+        const rawEvents = await fetchJSON(EVENTS_URL);
+        allActivities = rawActivities.activities || [];
+        events = rawEvents.events || [];
+        save(LS_CACHE_ACTIVITIES, allActivities);
+        save(LS_CACHE_EVENTS, events);
+        save(LS_LAST_REFRESH, Date.now());
+        setSourceStatus('online', 'Live from GitHub');
+      } catch {
+        // Fallback to cache
+        const cachedA = load(LS_CACHE_ACTIVITIES);
+        const cachedE = load(LS_CACHE_EVENTS);
+        if (cachedA && cachedE) {
+          allActivities = cachedA;
+          events = cachedE;
+          usedCache = true;
+          setSourceStatus('offline', 'Offline (cached data)');
+        } else {
+          // First visit, no data at all — use defaults
+          allActivities = [];
+          events = [];
+          setSourceStatus('offline', 'No data yet — add some activities!');
+        }
+      }
+
+      // Load pending changes
+      pendingChanges = load(LS_PENDING) || { completions: {}, activityChanges: [] };
+
+      // Merge pending onto data
+      if (pendingChanges.activityChanges.length > 0) {
+        allActivities = mergePendingActivities(allActivities, pendingChanges.activityChanges);
+      }
+      if (Object.keys(pendingChanges.completions).length > 0) {
+        events = mergePendingEvents(events, pendingChanges.completions);
+      }
+
+      // Filter activities to active only for rendering
+      activities = allActivities.filter(a => !a.deletedAt);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ─── Pending Changes ──────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
+    function savePending() {
+      save(LS_PENDING, pendingChanges);
+      updateSyncBanner();
+    }
+
+    function updateSyncBanner() {
+      const banner = document.getElementById('syncBanner');
+      const label = document.getElementById('syncLabel');
+      const comps = Object.keys(pendingChanges.completions).length;
+      const acts = pendingChanges.activityChanges.length;
+      const total = comps + acts;
+
+      if (total > 0) {
+        let msg = `📝 ${total} change${total !== 1 ? 's' : ''} pending sync`;
+        const parts = [];
+        if (comps > 0) parts.push(`${comps} completion${comps !== 1 ? 's' : ''}`);
+        if (acts > 0) parts.push(`${acts} activity change${acts !== 1 ? 's' : ''}`);
+        label.textContent = `📝 ${parts.join(', ')} pending sync`;
+        banner.classList.add('visible');
+      } else {
+        banner.classList.remove('visible');
+      }
+    }
+
+    function clearPending() {
+      pendingChanges = { completions: {}, activityChanges: [] };
+      save(LS_PENDING, pendingChanges);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ─── GitHub Issue Creation ────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
+    async function createGitHubIssue(title, bodyText, labels) {
+      const { token, repo } = settings;
+      if (!token || !repo) throw new Error('GitHub token or repo not configured.');
+
+      const res = await fetch(`https://api.github.com/repos/${repo}/issues`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title, body: bodyText, labels }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: res.statusText }));
+        throw new Error(`GitHub API error: ${err.message || res.status}`);
+      }
+
+      return res.json();
+    }
+
+    async function syncToGitHub() {
+      const syncBtn = document.getElementById('syncBtn');
+      syncBtn.disabled = true;
+      syncBtn.textContent = 'Syncing...';
+
+      try {
+        const compDates = Object.keys(pendingChanges.completions);
+        const hasComps = compDates.length > 0;
+        const hasActs = pendingChanges.activityChanges.length > 0;
+
+        // Sync daily completions (one issue per date with changes)
+        if (hasComps) {
+          for (const date of compDates) {
+            const dayComps = pendingChanges.completions[date];
+            // Build issue body with the full state of this date
+            const lines = [`Date: ${date}`];
+            // Get slugs -> names from allActivities
+            for (const [slug, val] of Object.entries(dayComps)) {
+              const activity = allActivities.find(a => a.slug === slug);
+              const name = activity ? activity.name : slug;
+              lines.push(`${name}: ${val ? 'yes' : 'no'}`);
+            }
+            await createGitHubIssue(
+              `Health Entry - ${date}`,
+              lines.join('\n'),
+              ['health-entry']
+            );
+          }
+        }
+
+        // Sync activity changes
+        if (hasActs) {
+          const lines = ['**Changes:**'];
+          for (const change of pendingChanges.activityChanges) {
+            lines.push(`${change.type}: ${change.name}`);
+          }
+          await createGitHubIssue(
+            `Activity changes - ${TODAY}`,
+            lines.join('\n'),
+            ['activity-change']
+          );
+        }
+
+        clearPending();
+        syncBtn.textContent = 'Synced ✓';
+
+        const total = compDates.length + (hasActs ? 1 : 0);
+        toast(`Synced ${total} item${total !== 1 ? 's' : ''} to GitHub!`, 'success');
+
+        // Re-save state (pending is cleared now)
+        saveState();
+
+      } catch (err) {
+        toast(`Sync failed: ${err.message}`, 'error');
+        syncBtn.textContent = 'Sync to GitHub';
+        syncBtn.disabled = false;
+        return;
+      }
+
+      syncBtn.disabled = false;
+      syncBtn.textContent = 'Sync to GitHub';
+      updateSyncBanner();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ─── State persistence (local + pending) ──────────────
+    // ═══════════════════════════════════════════════════════
+
+    function saveState() {
+      // We don't save activities/events back to localStorage cache here
+      // because those come from GitHub. We only save pending changes.
+      savePending();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ─── Computed stats ───────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
     function dayConsistency(dateKey) {
-      const day = completions[dateKey];
+      const day = events.find(e => e.date === dateKey);
       if (!day) return 0;
-      const itemIds = Object.keys(day);
-      if (itemIds.length === 0) return 0;
-      const done = itemIds.filter(id => day[id]).length;
-      return done / itemIds.length;
+      const ids = Object.keys(day.completions);
+      if (ids.length === 0) return 0;
+      const done = ids.filter(id => day.completions[id]).length;
+      return done / ids.length;
     }
 
     function todayProgress() {
-      if (items.length === 0) return { done: 0, total: 0, pct: 0 };
-      const day = completions[TODAY] || {};
-      const relevant = items.filter(i => day[i.id] !== undefined);
-      const total = items.length;
-      const done = items.filter(i => day[i.id] === true).length;
+      if (activities.length === 0) return { done: 0, total: 0, pct: 0 };
+      const day = events.find(e => e.date === TODAY);
+      const total = activities.length;
+      const done = activities.filter(a => day && day.completions[a.slug] === true).length;
       return { done, total, pct: total > 0 ? done / total : 0 };
     }
 
     function getOverallConsistency() {
-      const dates = Object.keys(completions);
-      if (dates.length === 0) return 0;
+      if (events.length === 0) return 0;
       let totalChecks = 0, doneChecks = 0;
-      for (const d of dates) {
-        const day = completions[d];
-        const ids = Object.keys(day);
-        for (const id of ids) {
+      for (const day of events) {
+        for (const [slug, val] of Object.entries(day.completions)) {
           totalChecks++;
-          if (day[id]) doneChecks++;
+          if (val) doneChecks++;
         }
       }
       return totalChecks > 0 ? doneChecks / totalChecks : 0;
     }
 
     function getStreak() {
-      // Walk backwards from today. A day counts if it's 100% on its tracked items.
       let streak = 0;
       const now = new Date();
       for (let i = 0; i < 365; i++) {
         const d = new Date(now);
         d.setDate(d.getDate() - i);
         const key = dateStr(d);
-        const day = completions[key];
+        const day = events.find(e => e.date === key);
         if (!day) break;
-        const ids = Object.keys(day);
+        const ids = Object.keys(day.completions);
         if (ids.length === 0) break;
-        const allDone = ids.every(id => day[id] === true);
+        const allDone = ids.every(id => day.completions[id]);
         if (!allDone) break;
         streak++;
       }
@@ -696,7 +1127,10 @@
       return dates;
     }
 
-    // ─── Date formatting ────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+    // ─── Date formatting ──────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
     function formatDateHeading(d) {
       const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
       const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -709,10 +1143,13 @@
       return `${months[+m - 1]} ${+d}`;
     }
 
-    // ─── Render Checklist ───────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+    // ─── Render Checklist ─────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
     function renderChecklist() {
       const container = document.getElementById('checklistItems');
-      if (items.length === 0) {
+      if (activities.length === 0) {
         container.innerHTML = `
           <div class="empty-checklist">
             <div class="emoji">🎯</div>
@@ -720,25 +1157,20 @@
             <p style="font-size:0.8rem;color:var(--text-tertiary);">Add one below to get started!</p>
           </div>`;
       } else {
-        container.innerHTML = items.map(item => {
-          const checked = !!(completions[TODAY] && completions[TODAY][item.id]);
+        const day = events.find(e => e.date === TODAY);
+        container.innerHTML = activities.map(item => {
+          const checked = day && day.completions[item.slug] === true;
           return `
-            <div class="checklist-item${checked ? ' checked' : ''}" data-id="${item.id}">
-              <input type="checkbox" id="chk-${item.id}" ${checked ? 'checked' : ''} />
-              <label for="chk-${item.id}">${escHtml(item.name)}</label>
-              <button class="delete-btn" data-id="${item.id}" title="Remove goal">✕</button>
+            <div class="checklist-item${checked ? ' checked' : ''}" data-slug="${item.slug}">
+              <input type="checkbox" id="chk-${item.slug}" ${checked ? 'checked' : ''} />
+              <label for="chk-${item.slug}">${escHtml(item.name)}</label>
+              <button class="delete-btn" data-slug="${item.slug}" title="Remove goal">✕</button>
             </div>`;
         }).join('');
       }
       updateProgressBar();
       updateStats();
       updateChartBadge();
-    }
-
-    function escHtml(s) {
-      const div = document.createElement('div');
-      div.textContent = s;
-      return div.innerHTML;
     }
 
     function updateProgressBar() {
@@ -748,7 +1180,10 @@
       document.getElementById('checklistCount').textContent = `${total} item${total !== 1 ? 's' : ''}`;
     }
 
-    // ─── Render Stats ────────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+    // ─── Render Stats ─────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
     function updateStats() {
       const overall = getOverallConsistency();
       const streak = getStreak();
@@ -758,19 +1193,22 @@
       document.getElementById('currentStreak').textContent = `${streak} day${streak !== 1 ? 's' : ''}`;
       document.getElementById('todayRingText').textContent = `${Math.round(pct * 100)}%`;
 
-      // Animated ring
       const circumference = 2 * Math.PI * 30;
       const offset = circumference * (1 - pct);
-      document.querySelector('.ring-fg').setAttribute('stroke-dashoffset', offset);
+      const ring = document.querySelector('.ring-fg');
+      if (ring) ring.setAttribute('stroke-dashoffset', offset);
     }
 
-    // ─── Chart ───────────────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+    // ─── Chart ────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
     function renderChart() {
       const dates = getChartDates();
       const values = dates.map(d => {
         const p = dayConsistency(d);
-        // If a day has no completions at all, exclude it from chart (null)
-        if (!completions[d] || Object.keys(completions[d]).length === 0) return null;
+        const day = events.find(e => e.date === d);
+        if (!day || Object.keys(day.completions).length === 0) return null;
         return Math.round(p * 100);
       });
 
@@ -862,11 +1300,14 @@
 
     function updateChartBadge() {
       const dates = getChartDates();
-      const hasData = dates.some(d => completions[d] && Object.keys(completions[d]).length > 0);
+      const hasData = dates.some(d => events.find(e => e.date === d));
       document.getElementById('chartBadge').textContent = hasData ? 'Last 30 days' : 'No data yet';
     }
 
-    // ─── Heatmap ────────────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+    // ─── Heatmap ──────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
     function renderHeatmap() {
       const now = new Date();
       const year = now.getFullYear();
@@ -877,13 +1318,9 @@
       const lastDay = new Date(year, month + 1, 0);
       const daysInMonth = lastDay.getDate();
 
-      // Day of week for first day (0=Sun, 1=Mon, ... 6=Sat)
       const startDow = firstDay.getDay();
-      // We want Monday-based (0=Mon, ... 6=Sun)
       const startOffset = startDow === 0 ? 6 : startDow - 1;
-      // Total cells = offset + days
       const totalCells = startOffset + daysInMonth;
-      const cols = Math.ceil(totalCells / 7);
 
       const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
       document.getElementById('heatmapMonthLabel').textContent = monthNames[month];
@@ -895,7 +1332,7 @@
       grid.innerHTML = '';
 
       let hasData = false;
-      const cells = [];
+
       for (let i = 0; i < totalCells; i++) {
         const dayNum = i - startOffset + 1;
         const isOffset = i < startOffset;
@@ -905,19 +1342,22 @@
 
         let level = 0;
         let pct = 0;
-        if (key && completions[key]) {
-          const day = completions[key];
-          const ids = Object.keys(day);
-          if (ids.length > 0) {
-            const done = ids.filter(id => day[id]).length;
-            pct = done / ids.length;
-            level = pct === 0 ? 0 : Math.min(4, Math.ceil(pct * 4));
-            if (ids.length > 0) hasData = true;
+
+        if (key) {
+          const day = events.find(e => e.date === key);
+          if (day) {
+            const ids = Object.keys(day.completions);
+            if (ids.length > 0) {
+              const done = ids.filter(id => day.completions[id]).length;
+              pct = done / ids.length;
+              level = pct === 0 ? 0 : Math.min(4, Math.ceil(pct * 4));
+              if (ids.length > 0) hasData = true;
+            }
           }
         }
 
         const cell = document.createElement('div');
-        cell.className = `heatmap-cell level-${level}${isToday ? ' today' : ''}${isOffset ? '' : ''}`;
+        cell.className = `heatmap-cell level-${level}${isToday ? ' today' : ''}`;
         if (key) {
           cell.dataset.date = key;
           cell.dataset.pct = Math.round(pct * 100);
@@ -938,9 +1378,7 @@
     const tooltipEl = document.getElementById('heatmapTooltip');
     function onHeatmapHover(e) {
       const cell = e.currentTarget;
-      const date = cell.dataset.date;
-      const pct = cell.dataset.pct;
-      tooltipEl.textContent = `${date} · ${pct}%`;
+      tooltipEl.textContent = `${cell.dataset.date} · ${cell.dataset.pct}%`;
       tooltipEl.classList.add('visible');
     }
     function onHeatmapMove(e) {
@@ -951,32 +1389,52 @@
       tooltipEl.classList.remove('visible');
     }
 
-    // ─── Event Handlers ─────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+    // ─── Event Handlers ───────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
     function handleCheckboxChange(e) {
       if (e.target.type !== 'checkbox') return;
-      const itemId = e.target.id.replace('chk-', '');
-      if (!completions[TODAY]) completions[TODAY] = {};
-      // Ensure all items are tracked for today (not just the changed one)
-      items.forEach(item => {
-        if (completions[TODAY][item.id] === undefined) completions[TODAY][item.id] = false;
-      });
-      completions[TODAY][itemId] = e.target.checked;
-      persistState();
+      const slug = e.target.id.replace('chk-', '');
+      const checked = e.target.checked;
+
+      // Track in pending completions
+      if (!pendingChanges.completions[TODAY]) {
+        pendingChanges.completions[TODAY] = {};
+      }
+      pendingChanges.completions[TODAY][slug] = checked;
+
+      // Also update the local events array for immediate stats
+      let day = events.find(e => e.date === TODAY);
+      if (!day) {
+        day = { date: TODAY, completions: {} };
+        events.push(day);
+      }
+      day.completions[slug] = checked;
+
+      saveState();
       renderChecklist();
       renderChart();
       renderHeatmap();
-      updateStats();
     }
 
     function handleDelete(e) {
       const btn = e.target.closest('.delete-btn');
       if (!btn) return;
       e.stopPropagation();
-      const id = btn.dataset.id;
-      items = items.filter(i => i.id !== id);
-      // Remove from completions
-      Object.keys(completions).forEach(d => delete completions[d][id]);
-      persistState();
+      const slug = btn.dataset.slug;
+      const item = activities.find(a => a.slug === slug);
+      if (!item) return;
+
+      // Track in pending
+      pendingChanges.activityChanges.push({ type: 'remove', name: item.name });
+
+      // Update local state immediately
+      activities = activities.filter(a => a.slug !== slug);
+      const allItem = allActivities.find(a => a.slug === slug);
+      if (allItem) allItem.deletedAt = TODAY;
+
+      saveState();
       renderChecklist();
       renderChart();
       renderHeatmap();
@@ -986,52 +1444,169 @@
       const input = document.getElementById('newItemInput');
       const name = input.value.trim();
       if (!name) return;
-      const newItem = { id: genId(), name };
-      items.push(newItem);
-      // Add to today's completions (default unchecked)
-      if (!completions[TODAY]) completions[TODAY] = {};
-      completions[TODAY][newItem.id] = false;
+
+      const slug = nameToSlug(name);
+
+      // Track in pending
+      pendingChanges.activityChanges.push({ type: 'add', name });
+
+      // Update local state immediately
+      if (!allActivities.find(a => a.slug === slug)) {
+        allActivities.push({ slug, name, createdAt: TODAY, deletedAt: null });
+      } else {
+        const existing = allActivities.find(a => a.slug === slug);
+        existing.deletedAt = null;
+      }
+      if (!activities.find(a => a.slug === slug)) {
+        activities.push({ slug, name, createdAt: TODAY, deletedAt: null });
+      }
+
+      // Ensure today's completions entry exists
+      let day = events.find(e => e.date === TODAY);
+      if (!day) {
+        day = { date: TODAY, completions: {} };
+        events.push(day);
+      }
+      day.completions[slug] = false;
+
       input.value = '';
       document.getElementById('addItemBtn').disabled = true;
-      persistState();
+      saveState();
       renderChecklist();
       renderChart();
       renderHeatmap();
       input.focus();
     }
 
-    // ─── Init ───────────────────────────────────────────────────────────
-    function init() {
-      // Header date
-      document.getElementById('headerDate').textContent = formatDateHeading(new Date());
-
-      // Ensure today exists in completions with all items tracked
-      if (!completions[TODAY]) {
-        completions[TODAY] = {};
-      }
-      items.forEach(item => {
-        if (completions[TODAY][item.id] === undefined) completions[TODAY][item.id] = false;
+    function handleRefresh() {
+      setSourceStatus('loading', 'Refreshing from GitHub...');
+      loadData().then(() => {
+        renderAll();
+        toast('Data refreshed from GitHub', 'success');
+      }).catch(err => {
+        toast(`Refresh failed: ${err.message}`, 'error');
       });
+    }
 
-      // Render
+    // ═══════════════════════════════════════════════════════
+    // ─── Settings ─────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
+    function loadSettings() {
+      const s = load(LS_SETTINGS);
+      if (s) settings = { ...settings, ...s };
+    }
+
+    function saveSettingsToLS() {
+      save(LS_SETTINGS, settings);
+    }
+
+    function openSettings() {
+      const modal = document.getElementById('settingsModal');
+      document.getElementById('settingsRepo').value = settings.repo || '';
+      document.getElementById('settingsToken').value = settings.token || '';
+      updateConnectionStatus();
+      modal.classList.add('visible');
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsModal').classList.remove('visible');
+    }
+
+    function updateConnectionStatus() {
+      const el = document.getElementById('connectionStatus');
+      if (settings.token && settings.repo) {
+        el.innerHTML = `<div class="status-badge connected">● Connected to ${escHtml(settings.repo)}</div>`;
+      } else if (settings.repo) {
+        el.innerHTML = `<div class="status-badge disconnected">○ Token not configured</div>`;
+      } else {
+        el.innerHTML = `<div class="status-badge disconnected">○ Not configured</div>`;
+      }
+    }
+
+    function saveSettingsFromModal() {
+      const repo = document.getElementById('settingsRepo').value.trim();
+      const token = document.getElementById('settingsToken').value.trim();
+      settings.repo = repo;
+      settings.token = token;
+      saveSettingsToLS();
+      updateConnectionStatus();
+      toast('Settings saved', 'success');
+      closeSettings();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ─── Render All ───────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
+    function renderAll() {
       renderChecklist();
       renderChart();
       renderHeatmap();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ─── Init ─────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
+    async function init() {
+      // Load settings
+      loadSettings();
+
+      // Header date
+      document.getElementById('headerDate').textContent = formatDateHeading(new Date());
+
+      // Load data from GitHub + cache
+      await loadData();
+
+      // Render everything
+      renderAll();
+      updateSyncBanner();
 
       // ── Event Listeners ──
+
+      // Checklist
       document.getElementById('checklistItems').addEventListener('change', handleCheckboxChange);
       document.getElementById('checklistItems').addEventListener('click', handleDelete);
 
+      // Add item
       const newItemInput = document.getElementById('newItemInput');
       const addBtn = document.getElementById('addItemBtn');
-
-      newItemInput.addEventListener('input', () => {
-        addBtn.disabled = !newItemInput.value.trim();
-      });
+      newItemInput.addEventListener('input', () => { addBtn.disabled = !newItemInput.value.trim(); });
       newItemInput.addEventListener('keydown', e => {
         if (e.key === 'Enter' && newItemInput.value.trim()) handleAddItem();
       });
       addBtn.addEventListener('click', handleAddItem);
+
+      // Sync
+      document.getElementById('syncBtn').addEventListener('click', syncToGitHub);
+      document.getElementById('discardBtn').addEventListener('click', () => {
+        clearPending();
+        toast('Changes discarded', 'error');
+        // Reload from cache to reset local state
+        const cachedA = load(LS_CACHE_ACTIVITIES) || [];
+        const cachedE = load(LS_CACHE_EVENTS) || [];
+        allActivities = cachedA;
+        events = cachedE;
+        activities = allActivities.filter(a => !a.deletedAt);
+        renderAll();
+      });
+
+      // Refresh
+      document.getElementById('refreshBtn').addEventListener('click', handleRefresh);
+
+      // Settings
+      document.getElementById('settingsBtn').addEventListener('click', openSettings);
+      document.getElementById('settingsCancelBtn').addEventListener('click', closeSettings);
+      document.getElementById('settingsSaveBtn').addEventListener('click', saveSettingsFromModal);
+      document.getElementById('settingsModal').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeSettings();
+      });
+
+      // Keyboard shortcut: Escape closes settings
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeSettings();
+      });
     }
 
     init();
