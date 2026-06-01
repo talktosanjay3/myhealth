@@ -45,10 +45,10 @@ const entry = {
   waterGlasses: parseNumber(parseLine('Water glasses')) || 0,
   exerciseMinutes: parseNumber(parseLine('Exercise minutes')) || 0,
   sleepHours: parseNumber(parseLine('Sleep hours')) || 0,
-  noMasturbation: (() => {
-    const value = parseLine('Masturbation');
+  generalHealth: (() => {
+    const value = parseLine('General health');
     const parsed = toBoolean(value);
-    return parsed === null ? false : !parsed;
+    return parsed === null ? false : parsed;
   })(),
   notes: parseLine('Notes') || ''
 };

@@ -63,11 +63,11 @@ function renderStats(entries) {
   const waterScore = entries.filter(entry => entry.waterGlasses >= 7).length;
   const sleepScore = entries.filter(entry => entry.sleepHours >= 6).length;
   const consistency = daysRecorded ? ((proteinScore + waterScore + sleepScore) / (daysRecorded * 3)) * 100 : 0;
-  const overallScore = daysRecorded ? ((proteinScore + waterScore + sleepScore + entries.filter(e => e.noMasturbation).length) / (daysRecorded * 4)) * 100 : 0;
+  const overallScore = daysRecorded ? ((proteinScore + waterScore + sleepScore + entries.filter(e => e.generalHealth).length) / (daysRecorded * 4)) * 100 : 0;
 
   document.getElementById('hero-title').textContent = latest ? `Latest entry: ${latest.label}` : 'No entries yet';
   document.getElementById('hero-text').textContent = latest
-    ? `Your latest record shows ${latest.proteinPercent}% protein, ${latest.waterGlasses} glasses, ${latest.exerciseMinutes} min exercise, and ${latest.noMasturbation ? 'no masturbation' : 'a recovery day'}.`
+    ? `Your latest record shows ${latest.proteinPercent}% protein, ${latest.waterGlasses} glasses, ${latest.exerciseMinutes} min exercise, and general health ${latest.generalHealth ? 'tracked' : 'not tracked'}.`
     : 'Create a new issue entry to start tracking your progress.';
   document.getElementById('streak').textContent = getStreak(entries);
   document.getElementById('consistency').textContent = formatPercent(consistency);
@@ -78,7 +78,7 @@ function renderStats(entries) {
   document.getElementById('latest-water').textContent = latest ? `${latest.waterGlasses} glasses` : '—';
   document.getElementById('latest-exercise').textContent = latest ? `${latest.exerciseMinutes} min` : '—';
   document.getElementById('latest-sleep').textContent = latest ? `${latest.sleepHours} hrs` : '—';
-  document.getElementById('latest-masturbation').textContent = latest ? (latest.noMasturbation ? 'Yes' : 'No') : '—';
+  document.getElementById('latest-health').textContent = latest ? (latest.generalHealth ? 'Yes' : 'No') : '—';
 
   document.getElementById('days-recorded').textContent = daysRecorded;
   document.getElementById('protein-score').textContent = formatPercent(daysRecorded ? (proteinScore / daysRecorded) * 100 : 0);
@@ -96,7 +96,7 @@ function createChart(recentEntries) {
   const proteinData = recentEntries.map(entry => entry.proteinPercent);
   const waterData = recentEntries.map(entry => entry.waterGlasses);
   const sleepData = recentEntries.map(entry => entry.sleepHours);
-  const habitData = recentEntries.map(entry => (entry.noMasturbation ? 100 : 20));
+  const habitData = recentEntries.map(entry => (entry.generalHealth ? 100 : 20));
 
   new Chart(ctx, {
     type: 'line',
@@ -131,7 +131,7 @@ function createChart(recentEntries) {
           pointRadius: 4
         },
         {
-          label: 'No masturbation signal',
+          label: 'General health signal',
           data: habitData,
           borderColor: chartColors.habit,
           backgroundColor: 'rgba(139,148,158,0.16)',

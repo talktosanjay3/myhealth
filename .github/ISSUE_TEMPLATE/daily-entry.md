@@ -10,5 +10,5 @@ Protein %: 90
 Water glasses: 8
 Exercise minutes: 30
 Sleep hours: 7.5
-Masturbation: no
+General health: yes
 Notes: Good energy, protein goal met, stayed disciplined.
