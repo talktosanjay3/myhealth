@@ -1070,12 +1070,11 @@
     // ═══════════════════════════════════════════════════════
 
     function dayConsistency(dateKey) {
+      if (activities.length === 0) return 0;
       const day = events.find(e => e.date === dateKey);
       if (!day) return 0;
-      const ids = Object.keys(day.completions);
-      if (ids.length === 0) return 0;
-      const done = ids.filter(id => day.completions[id]).length;
-      return done / ids.length;
+      const done = activities.filter(a => day.completions[a.slug] === true).length;
+      return done / activities.length;
     }
 
     function todayProgress() {
@@ -1087,12 +1086,14 @@
     }
 
     function getOverallConsistency() {
-      if (events.length === 0) return 0;
+      if (activities.length === 0 || events.length === 0) return 0;
       let totalChecks = 0, doneChecks = 0;
       for (const day of events) {
-        for (const [slug, val] of Object.entries(day.completions)) {
-          totalChecks++;
-          if (val) doneChecks++;
+        for (const activity of activities) {
+          if (day.completions[activity.slug] !== undefined) {
+            totalChecks++;
+            if (day.completions[activity.slug]) doneChecks++;
+          }
         }
       }
       return totalChecks > 0 ? doneChecks / totalChecks : 0;
@@ -1101,15 +1102,14 @@
     function getStreak() {
       let streak = 0;
       const now = new Date();
+      if (activities.length === 0) return 0;
       for (let i = 0; i < 365; i++) {
         const d = new Date(now);
         d.setDate(d.getDate() - i);
         const key = dateStr(d);
         const day = events.find(e => e.date === key);
         if (!day) break;
-        const ids = Object.keys(day.completions);
-        if (ids.length === 0) break;
-        const allDone = ids.every(id => day.completions[id]);
+        const allDone = activities.every(a => day.completions[a.slug] === true);
         if (!allDone) break;
         streak++;
       }
@@ -1206,10 +1206,11 @@
     function renderChart() {
       const dates = getChartDates();
       const values = dates.map(d => {
-        const p = dayConsistency(d);
         const day = events.find(e => e.date === d);
-        if (!day || Object.keys(day.completions).length === 0) return null;
-        return Math.round(p * 100);
+        if (!day) return null;
+        const hasCurrentActivity = activities.some(a => day.completions[a.slug] !== undefined);
+        if (!hasCurrentActivity) return null;
+        return Math.round(dayConsistency(d) * 100);
       });
 
       const hasData = values.some(v => v !== null);
@@ -1346,12 +1347,13 @@
         if (key) {
           const day = events.find(e => e.date === key);
           if (day) {
-            const ids = Object.keys(day.completions);
-            if (ids.length > 0) {
-              const done = ids.filter(id => day.completions[id]).length;
-              pct = done / ids.length;
+            const currentSlugs = activities.map(a => a.slug);
+            const done = currentSlugs.filter(s => day.completions[s] === true).length;
+            const tracked = currentSlugs.filter(s => day.completions[s] !== undefined).length;
+            if (tracked > 0) {
+              pct = done / currentSlugs.length;
               level = pct === 0 ? 0 : Math.min(4, Math.ceil(pct * 4));
-              if (ids.length > 0) hasData = true;
+              hasData = true;
             }
           }
         }
