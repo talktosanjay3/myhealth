@@ -46,6 +46,23 @@ if (adds.length === 0 && removes.length === 0) {
   process.exit(0);
 }
 
+// --- Load events to check history ---
+
+const eventsPath = path.join(__dirname, '..', 'data', 'events.json');
+let eventsData;
+try {
+  eventsData = JSON.parse(fs.readFileSync(eventsPath, 'utf8'));
+} catch {
+  eventsData = { events: [] };
+}
+
+/**
+ * Check if any historical event references this slug.
+ */
+function slugHasHistory(slug) {
+  return eventsData.events.some(e => e.completions && e.completions[slug] !== undefined);
+}
+
 // --- Update activities.json ---
 
 const activitiesPath = path.join(__dirname, '..', 'data', 'activities.json');
@@ -77,17 +94,25 @@ for (const name of adds) {
 
 for (const name of removes) {
   const slug = nameToSlug(name);
-  const existing = data.activities.find(a => a.slug === slug);
+  const idx = data.activities.findIndex(a => a.slug === slug);
 
-  if (existing) {
-    if (existing.deletedAt) {
-      console.log(`Activity already deleted: "${name}" (${slug}) — skipped`);
-    } else {
-      existing.deletedAt = now;
-      console.log(`Soft-deleted activity: "${name}" (${slug})`);
-    }
-  } else {
+  if (idx === -1) {
     console.log(`Activity not found: "${name}" — skipped`);
+    continue;
+  }
+
+  if (data.activities[idx].deletedAt) {
+    console.log(`Activity already deleted: "${name}" (${slug}) — skipped`);
+    continue;
+  }
+
+  // If the slug has historical events, soft-delete. Otherwise, remove entirely.
+  if (slugHasHistory(slug)) {
+    data.activities[idx].deletedAt = now;
+    console.log(`Soft-deleted activity (has history): "${name}" (${slug})`);
+  } else {
+    data.activities.splice(idx, 1);
+    console.log(`Removed activity (no history): "${name}" (${slug})`);
   }
 }
 
