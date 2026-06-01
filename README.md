@@ -20,7 +20,7 @@ A static GitHub Pages dashboard for your health checklist. Daily entries are rec
 Create a new issue with the `Daily health entry` template. Example issue body:
 
 ```text
-Date: 2026-06-01
+Date: 2026-05-31
 Protein %: 90
 Water glasses: 8
 Exercise minutes: 30
@@ -28,6 +28,14 @@ Sleep hours: 7.5
 General health: yes
 Notes: Good energy, protein goal met, stayed disciplined.
 ```
+
+## How to add inputs
+
+1. Open a new issue in the repository.
+2. Choose the `Daily health entry` template.
+3. Fill in the fields and submit the issue.
+4. Wait for the workflow to run and update `data/checklist.json`.
+5. Refresh the GitHub Pages site to see the latest metrics.
 
 ## Notes
 

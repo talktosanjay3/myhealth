@@ -13,21 +13,44 @@
       <div>
         <p class="eyebrow">Daily health tracker</p>
         <h1>MyHealth Checklist</h1>
-        <p class="subtitle">Track nutrition, movement, rest, and habit wins with data, charts and motivation.</p>
+        <p class="subtitle">Your dashboard for protein, water, sleep, and general health consistency.</p>
       </div>
-      <div class="badge">60-day plan</div>
+      <div class="badge">Built for daily momentum</div>
     </header>
 
     <section class="hero-card">
-      <div>
-        <h2 id="hero-title">Welcome back</h2>
-        <p id="hero-text">Loading your latest health summary…</p>
+      <div class="hero-copy">
+        <h2 id="hero-title">Loading your latest progress…</h2>
+        <p id="hero-text">The dashboard will display your most recent entries and consistency score.</p>
       </div>
       <div class="hero-metrics">
         <div><span id="streak">0</span><small>day streak</small></div>
         <div><span id="consistency">0%</span><small>consistency</small></div>
         <div><span id="progress">0%</span><small>goal score</small></div>
       </div>
+    </section>
+
+    <section class="overview-grid">
+      <article class="mini-card">
+        <p>Protein target</p>
+        <strong id="today-protein">—</strong>
+        <div class="progress-bar" id="protein-bar"><span></span></div>
+      </article>
+      <article class="mini-card">
+        <p>Water intake</p>
+        <strong id="today-water">—</strong>
+        <div class="progress-bar" id="water-bar"><span></span></div>
+      </article>
+      <article class="mini-card">
+        <p>Sleep</p>
+        <strong id="today-sleep">—</strong>
+        <div class="progress-bar" id="sleep-bar"><span></span></div>
+      </article>
+      <article class="mini-card">
+        <p>General health</p>
+        <strong id="today-health">—</strong>
+        <div class="progress-bar" id="health-bar"><span></span></div>
+      </article>
     </section>
 
     <section class="cards-grid">
@@ -40,15 +63,16 @@
           <div><dt>Exercise</dt><dd id="latest-exercise">—</dd></div>
           <div><dt>Sleep</dt><dd id="latest-sleep">—</dd></div>
           <div><dt>General health</dt><dd id="latest-health">—</dd></div>
+          <div><dt>Notes</dt><dd id="latest-notes">—</dd></div>
         </dl>
       </article>
       <article class="card">
         <h3>Weekly summary</h3>
         <ul>
           <li><strong id="days-recorded">0</strong> days recorded</li>
-          <li><strong id="protein-score">0%</strong> days hit protein target</li>
-          <li><strong id="water-score">0%</strong> days hydrated</li>
-          <li><strong id="sleep-score">0%</strong> days rested</li>
+          <li><strong id="protein-score">0%</strong> protein goal hit</li>
+          <li><strong id="water-score">0%</strong> hydration hit</li>
+          <li><strong id="sleep-score">0%</strong> sleep goal hit</li>
         </ul>
       </article>
       <article class="card uplift">
@@ -60,35 +84,36 @@
     <section class="chart-card">
       <div class="chart-header">
         <div>
-          <h3>Health trend</h3>
-          <p>Review your consistency over the last 14 days.</p>
+          <h3>Trend overview</h3>
+          <p>Track last 14 days of progress and see how your routine is improving.</p>
         </div>
       </div>
-      <canvas id="healthChart" height="280"></canvas>
+      <canvas id="healthChart"></canvas>
     </section>
 
     <section class="guide-card">
-      <h3>How to log a new entry</h3>
-      <p>Use a GitHub issue to add or update your daily entry. The workflow will update <code>data/checklist.json</code> automatically.</p>
+      <h3>How to add your inputs</h3>
+      <p>Add new daily data using a GitHub issue. The repository workflow will update <code>data/checklist.json</code> for you.</p>
       <ol>
         <li>Open a new issue in the repository.</li>
-        <li>Use the daily entry template below.</li>
-        <li>Submit the issue and the action will update the JSON file.</li>
+        <li>Select the <strong>Daily health entry</strong> template.</li>
+        <li>Fill in the values and submit the issue.</li>
       </ol>
+      <p>Example issue body:</p>
       <div class="template-card">
-        <pre><code>Date: 2026-06-01
+        <pre><code>Date: 2026-05-31
 Protein %: 90
 Water glasses: 8
 Exercise minutes: 30
 Sleep hours: 7.5
 General health: yes
-Notes: Hit all protein targets and stayed focused.</code></pre>
+Notes: Strong energy, good protein intake, stayed on track.</code></pre>
       </div>
-      <p class="note">If your GitHub Pages site is live, refresh after the workflow commits the update.</p>
+      <p class="note">After the workflow runs, refresh the page to see your updated metrics.</p>
     </section>
 
     <footer class="footer">
-      <p>Built for your MyHealth journey. Keep the habit, celebrate the progress.</p>
+      <p>Track your daily consistency and celebrate small wins every time.</p>
     </footer>
   </div>
 

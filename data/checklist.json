@@ -1,13 +1,40 @@
 {
   "entries": [
     {
+      "date": "2026-05-28",
+      "proteinPercent": 85,
+      "waterGlasses": 7,
+      "exerciseMinutes": 25,
+      "sleepHours": 7.0,
+      "generalHealth": true,
+      "notes": "Good start with balanced protein and sleep."
+    },
+    {
+      "date": "2026-05-29",
+      "proteinPercent": 88,
+      "waterGlasses": 8,
+      "exerciseMinutes": 30,
+      "sleepHours": 7.2,
+      "generalHealth": true,
+      "notes": "Stayed hydrated and hit protein goals."
+    },
+    {
+      "date": "2026-05-30",
+      "proteinPercent": 92,
+      "waterGlasses": 9,
+      "exerciseMinutes": 40,
+      "sleepHours": 7.5,
+      "generalHealth": true,
+      "notes": "Strong performance; consistency is building."
+    },
+    {
       "date": "2026-05-31",
       "proteinPercent": 90,
       "waterGlasses": 8,
       "exerciseMinutes": 35,
       "sleepHours": 7.5,
       "generalHealth": true,
-      "notes": "Started the plan with strong protein and movement."
+      "notes": "Today felt balanced and focused."
     }
   ]
 }
