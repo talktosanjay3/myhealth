@@ -4,7 +4,8 @@
       "date": "2026-06-01",
       "completions": {
         "30-min-run": true,
-        "gen-health": true
+        "gen-health": true,
+        "10000-steps": true
       }
     }
   ]
