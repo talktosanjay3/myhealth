@@ -58,15 +58,17 @@ if (Object.keys(completions).length === 0) {
 
 console.log(`Parsed entry for ${entryDate} with ${Object.keys(completions).length} completions.`);
 
-// --- Load activities to validate slugs ---
+// --- Load activities to fill in missing ones ---
 
 const activitiesPath = path.join(__dirname, '..', 'data', 'activities.json');
 let allSlugs = [];
+let activeActivityNames = [];
 try {
   const activitiesData = JSON.parse(fs.readFileSync(activitiesPath, 'utf8'));
   allSlugs = activitiesData.activities.map(a => a.slug);
+  activeActivityNames = activitiesData.activities.map(a => ({ slug: a.slug, name: a.name }));
 } catch {
-  console.warn('Could not read activities.json — skipping slug validation.');
+  console.warn('Could not read activities.json — skipping activity fill-in.');
 }
 
 // Warn about unknown slugs, but still save them
@@ -74,6 +76,18 @@ for (const slug of Object.keys(completions)) {
   if (!allSlugs.includes(slug)) {
     console.warn(`Unknown activity slug: "${slug}". Entry will still be saved.`);
   }
+}
+
+// Fill in false for any active activity not mentioned in the issue
+let filledCount = 0;
+for (const act of activeActivityNames) {
+  if (completions[act.slug] === undefined) {
+    completions[act.slug] = false;
+    filledCount++;
+  }
+}
+if (filledCount > 0) {
+  console.log(`Filled in ${filledCount} unmentioned activities as incomplete.`);
 }
 
 // --- Update events.json ---

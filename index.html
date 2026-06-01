@@ -1005,13 +1005,14 @@
         if (hasComps) {
           for (const date of compDates) {
             const dayComps = pendingChanges.completions[date];
-            // Build issue body with the full state of this date
+            // Build issue body with ALL current activities (complete snapshot)
             const lines = [`Date: ${date}`];
-            // Get slugs -> names from allActivities
-            for (const [slug, val] of Object.entries(dayComps)) {
-              const activity = allActivities.find(a => a.slug === slug);
-              const name = activity ? activity.name : slug;
-              lines.push(`${name}: ${val ? 'yes' : 'no'}`);
+            for (const activity of activities) {
+              // Use pending value if available, otherwise use current event value
+              const val = dayComps[activity.slug] !== undefined
+                ? dayComps[activity.slug]
+                : (events.find(e => e.date === date)?.completions?.[activity.slug] ?? false);
+              lines.push(`${activity.name}: ${val ? 'yes' : 'no'}`);
             }
             await createGitHubIssue(
               `Health Entry - ${date}`,
