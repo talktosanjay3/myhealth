@@ -93,6 +93,45 @@
     .sync-banner .sync-actions { display: flex; gap: 6px; }
     .sync-banner .sync-status { font-size: 0.75rem; color: var(--text-tertiary); }
 
+    /* ── Sync Countdown ── */
+    .sync-countdown {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-tertiary);
+    }
+    .sync-countdown.visible { display: flex; }
+    .sync-countdown .cd-track {
+      flex: 1;
+      height: 4px;
+      background: var(--bg);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .sync-countdown .cd-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 999px;
+      width: 100%;
+      transition: none;
+    }
+    .sync-countdown .cd-label {
+      white-space: nowrap;
+      min-width: 44px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .sync-countdown .cd-refresh {
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .sync-countdown .cd-refresh:hover { text-decoration: underline; }
+
     .btn {
       font-family: var(--font);
       font-size: 0.8rem;
@@ -643,6 +682,12 @@
     <span id="sourceLabel">Loading data...</span>
   </div>
 
+  <!-- Sync Countdown -->
+  <div class="sync-countdown" id="syncCountdown">
+    <div class="cd-track"><div class="cd-fill" id="cdFill"></div></div>
+    <span class="cd-label" id="cdLabel"></span>
+  </div>
+
   <!-- Dashboard Grid -->
   <div class="dashboard-grid">
     <!-- Checklist Card -->
@@ -1054,6 +1099,69 @@
       syncBtn.disabled = false;
       syncBtn.textContent = 'Sync to GitHub';
       updateSyncBanner();
+
+      // Start countdown timer after successful sync
+      startSyncTimer();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ─── Sync Countdown Timer ─────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
+    const CD_KEY = 'healthCountdown';
+    const CD_DURATION = 6 * 60 * 1000; // 6 minutes
+    let cdInterval = null;
+
+    function startSyncTimer() {
+      const endsAt = Date.now() + CD_DURATION;
+      save(CD_KEY, endsAt);
+      _runCountdown(endsAt);
+    }
+
+    function _runCountdown(endsAt) {
+      const el = document.getElementById('syncCountdown');
+      const fill = document.getElementById('cdFill');
+      const label = document.getElementById('cdLabel');
+
+      if (cdInterval) clearInterval(cdInterval);
+
+      function tick() {
+        const remaining = endsAt - Date.now();
+        if (remaining <= 0) {
+          clearInterval(cdInterval);
+          cdInterval = null;
+          el.classList.remove('visible');
+          save(CD_KEY, null);
+          // Auto-refresh data from GitHub
+          setSourceStatus('loading', 'Refreshing data from GitHub...');
+          loadData().then(() => {
+            renderAll();
+            toast('Data refreshed from GitHub', 'success');
+          }).catch(() => {
+            setSourceStatus('online', 'Live from GitHub');
+          });
+          return;
+        }
+
+        el.classList.add('visible');
+        const pct = (remaining / CD_DURATION) * 100;
+        fill.style.width = `${pct}%`;
+        const mins = Math.floor(remaining / 60000);
+        const secs = Math.floor((remaining % 60000) / 1000);
+        label.textContent = `${mins}:${String(secs).padStart(2, '0')}`;
+      }
+
+      tick();
+      cdInterval = setInterval(tick, 1000);
+    }
+
+    function restoreCountdown() {
+      const endsAt = load(CD_KEY);
+      if (endsAt && endsAt > Date.now()) {
+        _runCountdown(endsAt);
+      } else {
+        save(CD_KEY, null);
+      }
     }
 
     // ═══════════════════════════════════════════════════════
@@ -1576,6 +1684,9 @@
       // Render everything
       renderAll();
       updateSyncBanner();
+
+      // Restore countdown timer from previous session
+      restoreCountdown();
 
       // ── Event Listeners ──
 
