@@ -8,7 +8,7 @@
         "10000-steps": true,
         "70-protien": true,
         "meditate": true,
-        "self-talk": false
+        "self-talk": true
       }
     }
   ]
