@@ -6,7 +6,7 @@
         "30-min-run": true,
         "gen-health": true,
         "10000-steps": true,
-        "70-protien": false,
+        "70-protien": true,
         "meditate": true,
         "self-talk": false
       }
