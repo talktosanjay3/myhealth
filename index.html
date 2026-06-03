@@ -210,6 +210,32 @@
     .data-source .dot.loading { background: var(--text-tertiary); animation: pulse 1s ease infinite; }
     @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
+    /* ── Year-End Countdown ── */
+    .year-end-countdown {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      font-family: var(--font);
+    }
+    .year-end-countdown .ye-title {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      letter-spacing: 0.02em;
+    }
+    .year-end-countdown .ye-value {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent-dark);
+      background: var(--accent-light);
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+    }
+
     /* ── Dashboard grid ── */
     .dashboard-grid {
       display: grid;
@@ -687,6 +713,12 @@
   <div class="data-source">
     <span class="dot loading" id="sourceDot"></span>
     <span id="sourceLabel">Loading data...</span>
+  </div>
+
+  <!-- Year-End Countdown -->
+  <div class="year-end-countdown" id="yearEndCountdown">
+    <span class="ye-title">🎯 until end of 2026</span>
+    <span class="ye-value" id="yeValue">—</span>
   </div>
 
   <!-- Sync Countdown -->
@@ -1169,6 +1201,26 @@
       } else {
         save(CD_KEY, null);
       }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ─── Year-End Countdown ──────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
+    const YEAR_END = new Date('2026-12-31T23:59:59');
+
+    function updateYearEndCountdown() {
+      const el = document.getElementById('yeValue');
+      const diff = YEAR_END - Date.now();
+      if (diff <= 0) {
+        el.textContent = '🎉 2027!';
+        return;
+      }
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const mins = Math.floor((diff % 3600000) / 60000);
+      const secs = Math.floor((diff % 60000) / 1000);
+      el.textContent = `${days}d ${hours}h ${mins}m ${secs}s`;
     }
 
     // ═══════════════════════════════════════════════════════
@@ -1694,6 +1746,10 @@
 
       // Restore countdown timer from previous session
       restoreCountdown();
+
+      // Start year-end countdown
+      updateYearEndCountdown();
+      setInterval(updateYearEndCountdown, 1000);
 
       // ── Event Listeners ──
 
