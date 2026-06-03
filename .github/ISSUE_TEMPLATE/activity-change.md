@@ -7,6 +7,6 @@ assignees: ''
 ---
 
 **Changes:**
-add: Exercise 30 min
-add: 8 glasses water
-remove: Take vitamins
+add: 30 min run | level: 4
+add: Meditate | level: 2
+remove: Old activity

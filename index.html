@@ -339,6 +339,52 @@
     .checklist-item:hover .delete-btn { opacity: 1; }
     .checklist-item .delete-btn:hover { color: var(--red); background: var(--red-light); }
 
+    /* ── Level badge ── */
+    .level-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      line-height: 1.4;
+    }
+    .level-badge.lv1 { background: #d1fae5; color: #047857; }
+    .level-badge.lv2 { background: #a7f3d0; color: #065f46; }
+    .level-badge.lv3 { background: #fef3c7; color: #92400e; }
+    .level-badge.lv4 { background: #fed7aa; color: #9a3412; }
+    .level-badge.lv5 { background: #fecaca; color: #991b1b; }
+
+    /* ── Level picker ── */
+    .level-picker {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .level-picker .lv-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      font-family: var(--font);
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+      color: var(--text-tertiary);
+      line-height: 1;
+    }
+    .level-picker .lv-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .level-picker .lv-btn.selected { border-color: var(--accent); background: var(--accent-subtle); color: var(--accent-dark); }
+    .level-picker .lv-btn.lv1.selected { border-color: #047857; background: #d1fae5; color: #047857; }
+    .level-picker .lv-btn.lv2.selected { border-color: #065f46; background: #a7f3d0; color: #065f46; }
+    .level-picker .lv-btn.lv3.selected { border-color: #92400e; background: #fef3c7; color: #92400e; }
+    .level-picker .lv-btn.lv4.selected { border-color: #9a3412; background: #fed7aa; color: #9a3412; }
+    .level-picker .lv-btn.lv5.selected { border-color: #991b1b; background: #fecaca; color: #991b1b; }
+
     /* ── Add item ── */
     .add-item-form {
       display: flex;
@@ -722,6 +768,14 @@
       <div class="checklist-items" id="checklistItems"></div>
       <div class="add-item-form">
         <input type="text" id="newItemInput" placeholder="Add a new health goal…" maxlength="60" />
+        <div class="level-picker">
+          <span>Lv:</span>
+          <button class="lv-btn lv1" data-lv="1">1</button>
+          <button class="lv-btn lv2" data-lv="2">2</button>
+          <button class="lv-btn lv3 selected" data-lv="3">3</button>
+          <button class="lv-btn lv4" data-lv="4">4</button>
+          <button class="lv-btn lv5" data-lv="5">5</button>
+        </div>
         <button id="addItemBtn" disabled>Add</button>
       </div>
     </div>
@@ -948,7 +1002,7 @@
           if (existing) {
             console.log(`Activity "${change.name}" already exists — skip`);
           } else {
-            merged.push({ slug, name: change.name, createdAt: TODAY });
+            merged.push({ slug, name: change.name, level: change.level || 3, createdAt: TODAY });
           }
         } else if (change.type === 'remove') {
           const idx = merged.findIndex(a => a.slug === slug);
@@ -1097,7 +1151,11 @@
         if (hasActs) {
           const lines = ['**Changes:**'];
           for (const change of pendingChanges.activityChanges) {
-            lines.push(`${change.type}: ${change.name}`);
+            if (change.type === 'add') {
+              lines.push(`add: ${change.name} | level: ${change.level || 3}`);
+            } else {
+              lines.push(`${change.type}: ${change.name}`);
+            }
           }
           await createGitHubIssue(
             `Activity changes - ${TODAY}`,
@@ -1221,52 +1279,70 @@
     }
 
     // ═══════════════════════════════════════════════════════
-    // ─── Computed stats ───────────────────────────────────
+    // ─── Computed stats (weighted by level) ───────────────
     // ═══════════════════════════════════════════════════════
 
+    function getLevelForSlug(slug) {
+      const a = allActivities.find(a => a.slug === slug);
+      return a ? (a.level || 1) : 1;
+    }
+
     /**
-     * Consistency for a given day based on whatever completions exist in events.
-     * This reflects the actual historical record, not current activity list.
+     * Weighted consistency for a given day. Each activity's completion
+     * carries weight equal to its level (1-5). Returns doneWeight / totalWeight.
      */
     function dayConsistency(dateKey) {
       const day = events.find(e => e.date === dateKey);
       if (!day) return 0;
       const slugs = Object.keys(day.completions);
       if (slugs.length === 0) return 0;
-      const done = slugs.filter(s => day.completions[s]).length;
-      return done / slugs.length;
+      let totalWeight = 0, doneWeight = 0;
+      for (const slug of slugs) {
+        const w = getLevelForSlug(slug);
+        totalWeight += w;
+        if (day.completions[slug]) doneWeight += w;
+      }
+      return totalWeight > 0 ? doneWeight / totalWeight : 0;
     }
 
     /**
-     * Today's progress — based on active current activities.
+     * Today's progress — weighted by level, against current activities.
      */
     function todayProgress() {
       if (activities.length === 0) return { done: 0, total: 0, pct: 0 };
       const day = events.find(e => e.date === TODAY);
-      const total = activities.length;
-      const done = activities.filter(a => day && day.completions[a.slug] === true).length;
-      return { done, total, pct: total > 0 ? done / total : 0 };
+      let totalWeight = 0, doneWeight = 0;
+      for (const a of activities) {
+        const w = a.level || 1;
+        totalWeight += w;
+        if (day && day.completions[a.slug] === true) doneWeight += w;
+      }
+      return {
+        done: activities.filter(a => day && day.completions[a.slug] === true).length,
+        total: activities.length,
+        pct: totalWeight > 0 ? doneWeight / totalWeight : 0
+      };
     }
 
     /**
-     * Overall consistency across all events data, counting whatever
-     * slugs were tracked on each day.
+     * Overall weighted consistency across all events data.
      */
     function getOverallConsistency() {
       if (events.length === 0) return 0;
-      let totalChecks = 0, doneChecks = 0;
+      let totalWeight = 0, doneWeight = 0;
       for (const day of events) {
         for (const [slug, val] of Object.entries(day.completions)) {
-          totalChecks++;
-          if (val) doneChecks++;
+          const w = getLevelForSlug(slug);
+          totalWeight += w;
+          if (val) doneWeight += w;
         }
       }
-      return totalChecks > 0 ? doneChecks / totalChecks : 0;
+      return totalWeight > 0 ? doneWeight / totalWeight : 0;
     }
 
     /**
      * Streak walks backwards from today. A day counts if every slug
-     * tracked in its completions is true.
+     * tracked in its completions is true. (Not weighted — all-or-nothing.)
      */
     function getStreak() {
       let streak = 0;
@@ -1330,10 +1406,12 @@
         const day = events.find(e => e.date === TODAY);
         container.innerHTML = activities.map(item => {
           const checked = day && day.completions[item.slug] === true;
+          const lv = item.level || 1;
           return `
             <div class="checklist-item${checked ? ' checked' : ''}" data-slug="${item.slug}">
               <input type="checkbox" id="chk-${item.slug}" ${checked ? 'checked' : ''} />
               <label for="chk-${item.slug}">${escHtml(item.name)}</label>
+              <span class="level-badge lv${lv}">L${lv}</span>
               <button class="delete-btn" data-slug="${item.slug}" title="Remove goal">✕</button>
             </div>`;
         }).join('');
@@ -1668,17 +1746,21 @@
       const name = input.value.trim();
       if (!name) return;
 
+      // Read selected level
+      const selectedBtn = document.querySelector('.level-picker .lv-btn.selected');
+      const level = selectedBtn ? parseInt(selectedBtn.dataset.lv, 10) : 3;
+
       const slug = nameToSlug(name);
 
-      // Track in pending
-      pendingChanges.activityChanges.push({ type: 'add', name });
+      // Track in pending (include level)
+      pendingChanges.activityChanges.push({ type: 'add', name, level });
 
       // Update local state immediately
       if (!allActivities.find(a => a.slug === slug)) {
-        allActivities.push({ slug, name, createdAt: TODAY });
+        allActivities.push({ slug, name, level, createdAt: TODAY });
       }
       if (!activities.find(a => a.slug === slug)) {
-        activities.push({ slug, name, createdAt: TODAY });
+        activities.push({ slug, name, level, createdAt: TODAY });
       }
 
       // Ensure today's completions entry exists
@@ -1691,6 +1773,9 @@
 
       input.value = '';
       document.getElementById('addItemBtn').disabled = true;
+      // Reset level picker to default
+      document.querySelectorAll('.level-picker .lv-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelector('.level-picker .lv-btn[data-lv="3"]')?.classList.add('selected');
       saveState();
       renderChecklist();
       renderChart();
@@ -1804,6 +1889,14 @@
         if (e.key === 'Enter' && newItemInput.value.trim()) handleAddItem();
       });
       addBtn.addEventListener('click', handleAddItem);
+
+      // Level picker
+      document.querySelectorAll('.level-picker .lv-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.level-picker .lv-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+        });
+      });
 
       // Sync
       document.getElementById('syncBtn').addEventListener('click', syncToGitHub);

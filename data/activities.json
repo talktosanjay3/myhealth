@@ -3,31 +3,37 @@
     {
       "slug": "10000-steps",
       "name": "10000 steps",
+      "level": 4,
       "createdAt": "2026-06-01"
     },
     {
       "slug": "30-min-run",
       "name": "30 min run",
+      "level": 4,
       "createdAt": "2026-06-01"
     },
     {
       "slug": "70-protien",
       "name": "70% protien",
+      "level": 3,
       "createdAt": "2026-06-01"
     },
     {
       "slug": "gen-health",
       "name": "Gen health",
+      "level": 5,
       "createdAt": "2026-06-01"
     },
     {
       "slug": "meditate",
       "name": "Meditate",
+      "level": 2,
       "createdAt": "2026-06-01"
     },
     {
       "slug": "self-talk",
       "name": "Self talk",
+      "level": 1,
       "createdAt": "2026-06-01"
     }
   ]

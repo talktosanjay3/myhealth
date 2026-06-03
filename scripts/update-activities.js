@@ -24,13 +24,18 @@ function todayStr() {
 // --- Parse the issue body ---
 
 const lines = body.split('\n').map(l => l.trim()).filter(Boolean);
-const adds = [];
+const adds = [];        // { name, level }
 const removes = [];
 
 for (const line of lines) {
-  const addMatch = line.match(/^add:\s*(.+)$/i);
+  const addMatch = line.match(/^add:\s*(.+?)(?:\s*\|\s*level:\s*(\d+))?\s*$/i);
   const removeMatch = line.match(/^remove:\s*(.+)$/i);
-  if (addMatch) adds.push(addMatch[1].trim());
+  if (addMatch) {
+    adds.push({
+      name: addMatch[1].trim(),
+      level: addMatch[2] ? parseInt(addMatch[2], 10) : 3
+    });
+  }
   if (removeMatch) removes.push(removeMatch[1].trim());
 }
 
@@ -46,19 +51,20 @@ const data = JSON.parse(fs.readFileSync(activitiesPath, 'utf8'));
 
 const now = todayStr();
 
-for (const name of adds) {
-  const slug = nameToSlug(name);
+for (const add of adds) {
+  const slug = nameToSlug(add.name);
   const existing = data.activities.find(a => a.slug === slug);
 
   if (existing) {
-    console.log(`Activity already exists: "${name}" (${slug}) — skipped`);
+    console.log(`Activity already exists: "${add.name}" (${slug}) — skipped`);
   } else {
     data.activities.push({
       slug,
-      name,
+      name: add.name,
+      level: add.level,
       createdAt: now,
     });
-    console.log(`Added activity: "${name}" (${slug})`);
+    console.log(`Added activity: "${add.name}" (${slug}) level:${add.level}`);
   }
 }
 
