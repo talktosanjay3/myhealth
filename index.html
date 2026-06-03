@@ -467,7 +467,7 @@
 
     /* ── Heatmap ── */
     .heatmap-card { margin-bottom: 16px; }
-    .heatmap-side { flex: 1; overflow-x: auto; }
+    .heatmap-side { flex: 1; overflow: hidden; }
     .heatmap-month-labels {
       display: flex;
       height: 16px;
@@ -488,12 +488,12 @@
     }
     .heatmap-grid {
       display: grid;
-      grid-template-rows: repeat(7, 14px);
+      grid-template-rows: repeat(7, var(--heatmap-cell, 12px));
       gap: 3px;
     }
     .heatmap-day-labels {
       display: grid;
-      grid-template-rows: repeat(7, 14px);
+      grid-template-rows: repeat(7, var(--heatmap-cell, 12px));
       gap: 3px;
       margin-right: 8px;
       vertical-align: top;
@@ -1536,22 +1536,27 @@
 
       const numWeeks = Math.ceil(cells.length / 7);
 
+      // ── Calculate cell size to fit without scroll ──
+      const heatmapContainer = document.getElementById('heatmapContainer');
+      const dayLabelsEl = document.getElementById('heatmapDayLabels');
+      // Available width = container width - day labels width - some buffer
+      const available = heatmapContainer.clientWidth - dayLabelsEl.offsetWidth - 8;
+      // 53 columns, N gaps. Gap shrinks on small screens.
+      const gapPx = available > 700 ? 3 : available > 450 ? 2 : 1;
+      const cellPx = Math.max(6, Math.min(14, Math.floor((available - (numWeeks - 1) * gapPx) / numWeeks)));
+      const colPx = cellPx + gapPx;
+
       // ── Month labels ──
       const monthLabelEl = document.getElementById('heatmapMonthLabels');
       monthLabelEl.innerHTML = '';
-      const cellPx = 14; // cell size
-      const gapPx = 3;
-      const colPx = cellPx + gapPx; // width per grid column
 
       for (let m = 0; m < 12; m++) {
-        // First day of month
         const firstOfMonth = new Date(year, m, 1);
         const firstIdx = Math.floor(
           (firstOfMonth - startDate) / 86400000
         ) + startOffset;
         const col = Math.floor(firstIdx / 7);
 
-        // Last day of month
         const lastOfMonth = new Date(year, m + 1, 0);
         const lastIdx = Math.floor(
           (lastOfMonth - startDate) / 86400000
@@ -1568,7 +1573,9 @@
       const grid = document.getElementById('heatmapGrid');
       grid.innerHTML = '';
       grid.style.gridTemplateColumns = `repeat(${numWeeks}, ${cellPx}px)`;
+      grid.style.gridTemplateRows = `repeat(7, ${cellPx}px)`;
       grid.style.gap = `${gapPx}px`;
+      heatmapContainer.style.setProperty('--heatmap-cell', `${cellPx}px`);
 
       let hasData = false;
 
