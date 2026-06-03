@@ -325,7 +325,6 @@
       text-decoration: line-through;
     }
     .checklist-item .delete-btn {
-      opacity: 0;
       background: none;
       border: none;
       color: var(--text-tertiary);
@@ -336,9 +335,10 @@
       transition: all var(--transition);
       font-family: var(--font);
       line-height: 1;
+      opacity: 0.4;
     }
-    .checklist-item:hover .delete-btn { opacity: 1; }
-    .checklist-item .delete-btn:hover { color: var(--red); background: var(--red-light); }
+    .checklist-item:hover .delete-btn { opacity: 0.7; }
+    .checklist-item .delete-btn:hover { opacity: 1; color: var(--red); background: var(--red-light); }
 
     /* ── Level badge ── */
     .level-badge {
