@@ -1521,11 +1521,35 @@
             tooltip: {
               backgroundColor: '#1a1d23',
               titleFont: { family: 'Inter', size: 12, weight: '600' },
-              bodyFont: { family: 'Inter', size: 13, weight: '700' },
-              padding: 8,
+              bodyFont: { family: 'Inter', size: 11, weight: '500' },
+              padding: 10,
               cornerRadius: 8,
               callbacks: {
-                label: ctx => `${ctx.parsed.y}%`
+                title: items => {
+                  const idx = items[0].dataIndex;
+                  return getChartDates()[idx] || '';
+                },
+                label: ctx => `${ctx.parsed.y}% weighted`,
+                afterBody: items => {
+                  const idx = items[0].dataIndex;
+                  const dateKey = getChartDates()[idx];
+                  const day = events.find(e => e.date === dateKey);
+                  if (!day) return [];
+                  const slugs = Object.keys(day.completions);
+                  let totalW = 0, doneW = 0;
+                  const rows = [];
+                  for (const slug of slugs) {
+                    const act = allActivities.find(a => a.slug === slug);
+                    const lv = act ? (act.level || 1) : 1;
+                    if (day.completions[slug]) doneW += lv;
+                    totalW += lv;
+                    const icon = day.completions[slug] ? '✓' : '✗';
+                    rows.push(`${icon} ${act ? act.name : slug} (L${lv})`);
+                  }
+                  rows.unshift(`─`.repeat(16));
+                  rows.unshift(`Weighted: ${doneW}/${totalW} = ${Math.round(doneW/totalW*100)}%`);
+                  return rows;
+                }
               }
             }
           },
