@@ -201,6 +201,7 @@
       color: var(--text-tertiary);
       font-weight: 500;
       margin-bottom: 16px;
+      justify-content: space-between;
     }
     .data-source .dot {
       width: 7px; height: 7px; border-radius: 50%; display: inline-block;
@@ -210,28 +211,19 @@
     .data-source .dot.loading { background: var(--text-tertiary); animation: pulse 1s ease infinite; }
     @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
-    /* ── Year-End Countdown ── */
-    .year-end-countdown {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 14px;
-      font-family: var(--font);
-    }
-    .year-end-countdown .ye-title {
-      font-size: 0.75rem;
+    /* Year-end countdown (inside data-source row) */
+    .data-source .ye-title {
+      font-size: 0.7rem;
       font-weight: 500;
       color: var(--text-tertiary);
-      letter-spacing: 0.02em;
     }
-    .year-end-countdown .ye-value {
-      font-size: 0.85rem;
+    .data-source .ye-value {
+      font-size: 0.75rem;
       font-weight: 700;
       color: var(--accent-dark);
       background: var(--accent-light);
-      padding: 3px 10px;
-      border-radius: 6px;
+      padding: 2px 8px;
+      border-radius: 5px;
       font-variant-numeric: tabular-nums;
       letter-spacing: 0.02em;
     }
@@ -709,14 +701,10 @@
     </div>
   </div>
 
-  <!-- Data source -->
+  <!-- Data source + year-end countdown -->
   <div class="data-source">
     <span class="dot loading" id="sourceDot"></span>
     <span id="sourceLabel">Loading data...</span>
-  </div>
-
-  <!-- Year-End Countdown -->
-  <div class="year-end-countdown" id="yearEndCountdown">
     <span class="ye-title">🎯 until end of 2026</span>
     <span class="ye-value" id="yeValue">—</span>
   </div>
