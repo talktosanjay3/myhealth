@@ -1808,6 +1808,7 @@
       document.getElementById('syncBtn').addEventListener('click', syncToGitHub);
       document.getElementById('discardBtn').addEventListener('click', () => {
         clearPending();
+        updateSyncBanner();
         toast('Changes discarded', 'error');
         // Reload from cache to reset local state
         const cachedA = load(LS_CACHE_ACTIVITIES) || [];
