@@ -37,7 +37,7 @@
       color: var(--text);
       line-height: 1.5;
       min-height: 100vh;
-      padding: 24px 16px;
+      padding: 56px 16px 24px;
       scrollbar-gutter: stable;
       overflow-x: hidden;
     }
@@ -240,7 +240,7 @@
     }
     @media (max-width: 680px) {
       .dashboard-grid { grid-template-columns: 1fr; }
-      body { padding: 16px 12px; }
+      body { padding: 48px 12px 16px; }
     }
 
     /* ── Checklist ── */
@@ -709,7 +709,7 @@
     @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
     @media (max-width: 520px) {
-      body { padding: 12px 8px; }
+      body { padding: 44px 8px 12px; }
       .card { padding: 14px 12px 16px; }
       .stats-grid { grid-template-columns: 1fr 1fr; }
       .checklist-item label { font-size: 0.82rem; }
@@ -723,9 +723,47 @@
       .level-picker { order: 1; }
       .add-item-form button { order: 2; }
     }
+  /* ── Ticker ── */
+  .ticker-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 32px;
+    background: #1a1d23;
+    overflow: hidden;
+    z-index: 100;
+  }
+  .ticker-track {
+    display: flex;
+    white-space: nowrap;
+    will-change: transform;
+  }
+  .ticker-track span {
+    display: inline-block;
+    padding: 0 6px;
+    font-size: 0.78rem;
+    color: #d1d5db;
+    font-weight: 450;
+    line-height: 32px;
+    font-family: var(--font);
+    letter-spacing: 0.02em;
+  }
+  .ticker-track .sep {
+    color: #ef4444;
+    font-weight: 300;
+  }
+  @keyframes ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
   </style>
 </head>
 <body>
+
+<div class="ticker-bar" id="tickerBar">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
 
 <div class="app-container">
 
@@ -1876,6 +1914,58 @@
     }
 
     // ═══════════════════════════════════════════════════════
+    // ─── Ticker ───────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
+
+    function initTicker() {
+      const track = document.getElementById('tickerTrack');
+      if (!track) return;
+
+      let texts = [
+        'Breathe', 'Sleep', 'Rest', 'Hydrate', 'Drink water',
+        'Move daily', 'Stay grounded', 'Keep going', 'Start fresh',
+        'Be consistent', 'Eat mindfully', 'Balance matters',
+        'Nourish yourself', 'Every choice counts', 'One day at a time',
+        'Small steps add up', 'Rest is productive', 'Stretch daily',
+        'Fuel your body', 'Eat whole foods', 'Strength grows',
+        'Show up daily', 'Growth mindset', 'Health is wealth',
+        'Listen to your body', 'Progress over perfection',
+        'Consistency compounds', 'Keep moving forward',
+        'Better every day', 'Make it count', 'Trust the process',
+        'Do your best', 'Breathe deeply', 'Be present',
+        'Take a walk', 'Just start', 'You got this',
+        'Keep showing up', 'One step at a time', 'Stay strong',
+        'Find your balance', 'Fresh air',
+        'Move with intention', 'Slow down',
+      ];
+
+      // Shuffle so the starting text is different every page load
+      for (let i = texts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [texts[i], texts[j]] = [texts[j], texts[i]];
+      }
+
+      // Build content with separator between each, then duplicate for seamless loop
+      let html = '';
+      const appendSet = () => {
+        texts.forEach((t, i) => {
+          html += `<span>${t}</span>`;
+          if (i < texts.length - 1) html += '<span class="sep">✦</span>';
+        });
+      };
+      appendSet();
+      html += '<span class="sep">✦</span>';
+      appendSet();
+
+      track.innerHTML = html;
+
+      // Speed: ~180px per second — lively ticker pace
+      const halfW = track.scrollWidth / 2;
+      const duration = Math.max(12, Math.round(halfW / 180));
+      track.style.animation = `ticker-scroll ${duration}s linear infinite`;
+    }
+
+    // ═══════════════════════════════════════════════════════
     // ─── Render All ───────────────────────────────────────
     // ═══════════════════════════════════════════════════════
 
@@ -1890,6 +1980,9 @@
     // ═══════════════════════════════════════════════════════
 
     async function init() {
+      // Start ticker immediately
+      initTicker();
+
       // Load settings
       loadSettings();
 
