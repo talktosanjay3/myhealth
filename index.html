@@ -467,19 +467,33 @@
 
     /* ── Heatmap ── */
     .heatmap-card { margin-bottom: 16px; }
+    .heatmap-side { flex: 1; overflow-x: auto; }
+    .heatmap-month-labels {
+      display: flex;
+      height: 16px;
+      font-size: 0.6rem;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      padding-left: 0;
+      margin-bottom: 2px;
+    }
+    .heatmap-month-labels span {
+      flex-shrink: 0;
+      text-align: left;
+      padding-left: 2px;
+    }
     .heatmap-wrapper {
-      overflow-x: auto;
-      padding: 4px 0;
+      overflow-x: visible;
+      padding: 0;
     }
     .heatmap-grid {
-      display: inline-grid;
-      grid-template-rows: repeat(7, 1fr);
-      grid-auto-flow: column;
+      display: grid;
+      grid-template-rows: repeat(7, 14px);
       gap: 3px;
     }
     .heatmap-day-labels {
-      display: inline-grid;
-      grid-template-rows: repeat(7, 1fr);
+      display: grid;
+      grid-template-rows: repeat(7, 14px);
       gap: 3px;
       margin-right: 8px;
       vertical-align: top;
@@ -508,6 +522,7 @@
       position: relative;
       cursor: default;
     }
+    .heatmap-cell[style*="visibility: hidden"] { background: transparent; }
     .heatmap-cell:hover {
       transform: scale(1.3);
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -670,7 +685,6 @@
       .stats-grid { grid-template-columns: 1fr 1fr; }
       .checklist-item label { font-size: 0.88rem; }
       .stat-card .stat-value { font-size: 1.5rem; }
-      .heatmap-cell { width: 12px; height: 12px; }
       header .left h1 { font-size: 1.4rem; }
       .modal { padding: 20px; }
     }
@@ -783,13 +797,16 @@
   <!-- Heatmap Card -->
   <div class="card heatmap-card">
     <div class="card-header">
-      <h2>Monthly Activity</h2>
-      <span class="badge" id="heatmapMonthLabel"></span>
+      <h2>Yearly Activity</h2>
+      <span class="badge" id="heatmapYearLabel">2026</span>
     </div>
     <div style="display:flex; align-items:flex-start;" id="heatmapContainer">
       <div class="heatmap-day-labels" id="heatmapDayLabels"></div>
-      <div class="heatmap-wrapper">
-        <div class="heatmap-grid" id="heatmapGrid"></div>
+      <div class="heatmap-side">
+        <div class="heatmap-month-labels" id="heatmapMonthLabels"></div>
+        <div class="heatmap-wrapper">
+          <div class="heatmap-grid" id="heatmapGrid"></div>
+        </div>
       </div>
     </div>
     <div class="heatmap-legend">
@@ -802,7 +819,7 @@
       <span>More</span>
     </div>
     <div class="heatmap-empty" id="heatmapEmpty">
-      <p>Check off some items to start filling your month</p>
+      <p>Check off some items to start filling your year</p>
     </div>
   </div>
 
@@ -1491,41 +1508,86 @@
     // ═══════════════════════════════════════════════════════
 
     function renderHeatmap() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth();
+      const year = new Date().getFullYear();
       const todayKey = TODAY;
+      const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-      const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
-      const daysInMonth = lastDay.getDate();
+      document.getElementById('heatmapYearLabel').textContent = String(year);
+      document.getElementById('heatmapDayLabels').innerHTML =
+        ['Mon','','Wed','','Fri','','Sun'].map(d => `<span>${d}</span>`).join('');
 
-      const startDow = firstDay.getDay();
+      // Calculate all days in the year
+      const startDate = new Date(year, 0, 1);
+      const endDate = new Date(year, 11, 31);
+
+      // Mon=0 offset for Jan 1
+      const startDow = startDate.getDay();
       const startOffset = startDow === 0 ? 6 : startDow - 1;
-      const totalCells = startOffset + daysInMonth;
 
-      const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-      document.getElementById('heatmapMonthLabel').textContent = monthNames[month];
+      // Build cells array: null = empty offset, string = date key
+      const cells = [];
+      for (let i = 0; i < startOffset; i++) cells.push(null);
 
-      const dayLabels = ['Mon','','Wed','','Fri','','Sun'];
-      document.getElementById('heatmapDayLabels').innerHTML = dayLabels.map(d => `<span>${d}</span>`).join('');
+      const d = new Date(startDate);
+      while (d <= endDate) {
+        cells.push(dateStr(d));
+        d.setDate(d.getDate() + 1);
+      }
 
+      const numWeeks = Math.ceil(cells.length / 7);
+
+      // ── Month labels ──
+      const monthLabelEl = document.getElementById('heatmapMonthLabels');
+      monthLabelEl.innerHTML = '';
+      const cellPx = 14; // cell size
+      const gapPx = 3;
+      const colPx = cellPx + gapPx; // width per grid column
+
+      for (let m = 0; m < 12; m++) {
+        // First day of month
+        const firstOfMonth = new Date(year, m, 1);
+        const firstIdx = Math.floor(
+          (firstOfMonth - startDate) / 86400000
+        ) + startOffset;
+        const col = Math.floor(firstIdx / 7);
+
+        // Last day of month
+        const lastOfMonth = new Date(year, m + 1, 0);
+        const lastIdx = Math.floor(
+          (lastOfMonth - startDate) / 86400000
+        ) + startOffset;
+        const lastCol = Math.floor(lastIdx / 7);
+
+        const span = document.createElement('span');
+        span.textContent = MONTH_NAMES[m];
+        span.style.width = `${(lastCol - col + 1) * colPx - gapPx}px`;
+        monthLabelEl.appendChild(span);
+      }
+
+      // ── Grid ──
       const grid = document.getElementById('heatmapGrid');
       grid.innerHTML = '';
+      grid.style.gridTemplateColumns = `repeat(${numWeeks}, ${cellPx}px)`;
+      grid.style.gap = `${gapPx}px`;
 
       let hasData = false;
 
-      for (let i = 0; i < totalCells; i++) {
-        const dayNum = i - startOffset + 1;
-        const isOffset = i < startOffset;
-        const date = isOffset ? null : new Date(year, month, dayNum);
-        const key = date ? dateStr(date) : null;
-        const isToday = key === todayKey;
+      for (let i = 0; i < cells.length; i++) {
+        const key = cells[i];
+        const isOffset = key === null;
 
+        // Determine row (0-6) and column
+        const row = i % 7;
+        const col = Math.floor(i / 7);
+
+        let date = null;
+        let isToday = false;
         let level = 0;
         let pct = 0;
 
         if (key) {
+          date = key;
+          isToday = key === todayKey;
           const day = events.find(e => e.date === key);
           if (day) {
             const slugs = Object.keys(day.completions);
@@ -1540,15 +1602,20 @@
 
         const cell = document.createElement('div');
         cell.className = `heatmap-cell level-${level}${isToday ? ' today' : ''}`;
-        if (key) {
-          cell.dataset.date = key;
+
+        // Position explicitly
+        cell.style.gridRow = `${row + 1}`;
+        cell.style.gridColumn = `${col + 1}`;
+
+        if (isOffset) {
+          cell.style.visibility = 'hidden';
+        }
+        if (date) {
+          cell.dataset.date = date;
           cell.dataset.pct = Math.round(pct * 100);
           cell.addEventListener('mouseenter', onHeatmapHover);
           cell.addEventListener('mousemove', onHeatmapMove);
           cell.addEventListener('mouseleave', onHeatmapLeave);
-        }
-        if (isOffset) {
-          cell.style.visibility = 'hidden';
         }
         grid.appendChild(cell);
       }
