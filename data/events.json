@@ -5,7 +5,7 @@
       "completions": {
         "10000-steps": true,
         "30-min-run": false,
-        "70-protien": false,
+        "70-protien": true,
         "gen-health": false,
         "meditate": false,
         "self-talk": false
