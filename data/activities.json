@@ -35,6 +35,12 @@
       "name": "Self talk",
       "level": 1,
       "createdAt": "2026-06-01"
+    },
+    {
+      "slug": "no-past",
+      "name": "No past",
+      "level": 5,
+      "createdAt": "2026-06-15"
     }
   ]
 }
