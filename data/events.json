@@ -1,6 +1,18 @@
 {
   "events": [
     {
+      "date": "2026-06-15",
+      "completions": {
+        "10000-steps": true,
+        "30-min-run": false,
+        "70-protien": true,
+        "gen-health": false,
+        "meditate": true,
+        "self-talk": true,
+        "no-past": true
+      }
+    },
+    {
       "date": "2026-06-14",
       "completions": {
         "10000-steps": true,
